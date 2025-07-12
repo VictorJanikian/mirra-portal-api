@@ -3,5 +3,6 @@
     public interface IEmailService
     {
         public Task SendActivationCode(string recipientEmail, string code);
+        public Task ActivateEmail(string email, string code);
     }
 }
