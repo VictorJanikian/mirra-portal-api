@@ -6,5 +6,6 @@ namespace Mirra_Portal_API.Database.Repositories.Interfaces
     {
         Task<Customer> Create(Customer customer);
         Task<Customer> GetByEmail(string email);
+        Task<Customer> Update(Customer customer);
     }
 }

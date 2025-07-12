@@ -5,8 +5,9 @@
         public string Name { get; set; }
         public string Email { get; set; }
         public string Password { get; set; }
-        public Boolean IsEmailConfirmed { get; set; }
-
+        public Boolean IsEmailActivated { get; set; }
+        public string? EmailActivationCode { get; set; }
+        public int? EmailActivationFailedAttempts { get; set; }
         public List<CustomerContentTypeConfiguration> ContentTypesConfigurations { get; set; }
     }
 }

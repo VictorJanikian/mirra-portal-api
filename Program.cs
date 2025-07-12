@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using Mirra_Portal_API.Database;
 using Mirra_Portal_API.Database.Repositories;
 using Mirra_Portal_API.Database.Repositories.Interfaces;
+using Mirra_Portal_API.Integration;
+using Mirra_Portal_API.Integration.Interfaces;
 using Mirra_Portal_API.Model.Responses;
 using Mirra_Portal_API.Services;
 using Mirra_Portal_API.Services.Interfaces;
@@ -70,6 +72,8 @@ void addAutoMapper(IServiceCollection services)
 void addServices(IServiceCollection services)
 {
     services.AddScoped<ICustomerService, CustomerService>();
+    services.AddScoped<IEmailService, EmailService>();
+    services.AddScoped<IEmailIntegration, EmailIntegration>();
     services.AddScoped<ICustomerRepository, CustomerRepository>();
 }
 

@@ -33,5 +33,19 @@ namespace Mirra_Portal_API.Database.Repositories
                 .FirstOrDefaultAsync();
 
         }
+
+        public async Task<Customer> Update(Customer customer)
+        {
+            var row = await _context.Customers
+                .Where(databaseCustomer => databaseCustomer.Id == customer.Id)
+                .FirstOrDefaultAsync();
+
+            if (row == null) return customer;
+
+            _mapper.Map(customer, row);
+            await _context.SaveChangesAsync();
+
+            return _mapper.Map(row, customer);
+        }
     }
 }
