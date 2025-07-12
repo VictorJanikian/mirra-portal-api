@@ -2,6 +2,6 @@
 {
     public interface IEmailIntegration
     {
-        public Task sendEmail(string sender, string recipient, string subject, string body);
+        public Task SendEmail(string sender, string recipient, string subject, string body);
     }
 }

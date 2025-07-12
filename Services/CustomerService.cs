@@ -45,8 +45,6 @@ namespace Mirra_Portal_API.Services
             customer.EmailActivationFailedAttempts = 0;
             await _customerRepository.Update(customer);
             await _emailService.SendActivationCode(customer.Email, activationCode);
-
-            //"XXXXX is your <app> activation code"
         }
     }
 }
