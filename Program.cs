@@ -6,12 +6,13 @@ using Mirra_Portal_API.Database.Repositories.Interfaces;
 using Mirra_Portal_API.Integration;
 using Mirra_Portal_API.Integration.Interfaces;
 using Mirra_Portal_API.Model.Responses;
+using Mirra_Portal_API.Security;
 using Mirra_Portal_API.Services;
 using Mirra_Portal_API.Services.Interfaces;
 
-IConfiguration configuration;
 
 var builder = WebApplication.CreateBuilder(args);
+IConfiguration configuration = builder.Configuration;
 
 builder.Services.AddControllers()
     .AddNewtonsoftJson(options => options.UseMemberCasing());
@@ -20,6 +21,7 @@ standardizeErrorResponses(builder.Services);
 addDatabaseContext(builder.Services);
 addAutoMapper(builder.Services);
 addServices(builder.Services);
+configureJwt(builder.Services);
 
 var app = builder.Build();
 
@@ -73,7 +75,14 @@ void addServices(IServiceCollection services)
 {
     services.AddScoped<ICustomerService, CustomerService>();
     services.AddScoped<IEmailService, EmailService>();
+    services.AddScoped<ILoginService, LoginService>();
     services.AddScoped<IEmailIntegration, EmailIntegration>();
     services.AddScoped<ICustomerRepository, CustomerRepository>();
 }
 
+void configureJwt(IServiceCollection services)
+{
+    var jwtPrivateKey = configuration.GetValue<string>("jwtprivatekey");
+    var signingConfigurations = new SigningConfigurations(jwtPrivateKey);
+    services.AddSingleton(signingConfigurations);
+}

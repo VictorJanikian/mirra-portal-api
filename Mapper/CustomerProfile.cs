@@ -11,6 +11,7 @@ namespace Mirra_Portal_API.Mapper
         {
             CreateMap<RegisterRequest, Customer>();
             CreateMap<Customer, RegisterResponse>();
+            CreateMap<Customer, LoginResponse>();
 
         }
     }
