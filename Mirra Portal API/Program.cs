@@ -1,5 +1,6 @@
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using Mirra_Portal_API.Database;
 using Mirra_Portal_API.Database.Repositories;
 using Mirra_Portal_API.Database.Repositories.Interfaces;
@@ -85,4 +86,13 @@ void configureJwt(IServiceCollection services)
     var jwtPrivateKey = configuration.GetValue<string>("jwtprivatekey");
     var signingConfigurations = new SigningConfigurations(jwtPrivateKey);
     services.AddSingleton(signingConfigurations);
+
+    var tokenConfigurations = new TokenConfigurations();
+    new ConfigureFromConfigurationOptions<TokenConfigurations>(
+        configuration.GetSection("TokenConfigurations"))
+            .Configure(tokenConfigurations);
+    services.AddSingleton(tokenConfigurations);
+
+    var jwtPublicKey = configuration.GetValue<string>("jwtpublickey");
+    services.AddJwtSecurity(tokenConfigurations, jwtPublicKey);
 }

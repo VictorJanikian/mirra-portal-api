@@ -3,12 +3,12 @@
 namespace Mirra_Portal_API.Database.DBEntities
 {
     [Table("customer_content_types_configurations")]
-    public class CustomerContentTypeConfigurationTableRow : EntityTableRow
+    public class CustomerContentPlatformConfigurationTableRow : EntityTableRow
     {
         public int CustomerId { get; set; }
         public CustomerTableRow Customer { get; set; }
-        public int ContentTypeId { get; set; }
-        public ContentTypeTableRow ContentType { get; set; }
+        public int ContentPlatformId { get; set; }
+        public ContentPlatformTableRow ContentPlatform { get; set; }
         public string Url { get; set; }
         public string Username { get; set; }
         public string Password { get; set; }

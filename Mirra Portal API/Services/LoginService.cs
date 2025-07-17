@@ -59,7 +59,7 @@ namespace Mirra_Portal_API.Services
             var securityToken = handler.CreateToken(new SecurityTokenDescriptor
             {
                 Issuer = "Mirra AI",
-                Audience = "Web App",
+                Audience = "Web Apps",
                 SigningCredentials = _signingConfigurations.SigningCredentials,
                 Subject = identity,
                 NotBefore = createdDate,

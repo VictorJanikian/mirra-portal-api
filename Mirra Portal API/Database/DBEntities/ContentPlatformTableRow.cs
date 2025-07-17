@@ -3,7 +3,7 @@
 namespace Mirra_Portal_API.Database.DBEntities
 {
     [Table("content_types")]
-    public class ContentTypeTableRow : EntityTableRow
+    public class ContentPlatformTableRow : EntityTableRow
     {
         public string Name { get; set; }
         public string? Prompt { get; set; }
