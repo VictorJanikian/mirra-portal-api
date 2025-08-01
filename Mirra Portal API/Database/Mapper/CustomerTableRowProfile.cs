@@ -4,9 +4,9 @@ using Mirra_Portal_API.Model;
 
 namespace Mirra_Portal_API.Database.Mapper
 {
-    public class CustomerProfile : Profile
+    public class CustomerTableRowProfile : Profile
     {
-        public CustomerProfile()
+        public CustomerTableRowProfile()
         {
             CreateMap<Customer, CustomerTableRow>()
                .ForMember(row => row.CreatedAt, options => options.Ignore())

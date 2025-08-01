@@ -2,7 +2,7 @@
 
 namespace Mirra_Portal_API.Database.DBEntities
 {
-    [Table("customer_content_types_configurations")]
+    [Table("customer_content_platforms_configurations")]
     public class CustomerContentPlatformConfigurationTableRow : EntityTableRow
     {
         public int CustomerId { get; set; }
@@ -12,5 +12,6 @@ namespace Mirra_Portal_API.Database.DBEntities
         public string Url { get; set; }
         public string Username { get; set; }
         public string Password { get; set; }
+        public List<SchedulingTableRow> Schedulings { get; set; }
     }
 }

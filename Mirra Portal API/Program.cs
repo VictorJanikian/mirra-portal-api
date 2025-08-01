@@ -4,8 +4,10 @@ using Microsoft.Extensions.Options;
 using Mirra_Portal_API.Database;
 using Mirra_Portal_API.Database.Repositories;
 using Mirra_Portal_API.Database.Repositories.Interfaces;
+using Mirra_Portal_API.Helper;
 using Mirra_Portal_API.Integration;
 using Mirra_Portal_API.Integration.Interfaces;
+using Mirra_Portal_API.Middleware.Identity;
 using Mirra_Portal_API.Model.Responses;
 using Mirra_Portal_API.Security;
 using Mirra_Portal_API.Services;
@@ -33,6 +35,8 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.UseMiddleware<IdentityMiddleware>();
 
 app.Run();
 
@@ -77,8 +81,11 @@ void addServices(IServiceCollection services)
     services.AddScoped<ICustomerService, CustomerService>();
     services.AddScoped<IEmailService, EmailService>();
     services.AddScoped<ILoginService, LoginService>();
+    services.AddScoped<IConfigurationService, ConfigurationService>();
     services.AddScoped<IEmailIntegration, EmailIntegration>();
+    services.AddScoped<ICustomerContentPlatformConfigurationRepository, CustomerContentPlatformConfigurationRepository>();
     services.AddScoped<ICustomerRepository, CustomerRepository>();
+    services.AddScoped<IdentityHelper>();
 }
 
 void configureJwt(IServiceCollection services)

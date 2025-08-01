@@ -17,6 +17,6 @@ namespace Mirra_Portal_API.Database.DBEntities
         public string? SEOAdditionalInformation { get; set; }
         public bool? IsDraft { get; set; }
         public string Language { get; set; }
-        public DateTime CreatedAt { get; set; }
+        public DateTime? CreatedAt { get; set; }
     }
 }

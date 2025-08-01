@@ -4,6 +4,6 @@ namespace Mirra_Portal_API.Services.Interfaces
 {
     public interface IConfigurationService
     {
-        public Task<Customer> CreateConfiguration(Customer customer);
+        public Task<CustomerPlatformConfiguration> CreateConfiguration(CustomerPlatformConfiguration configuration);
     }
 }
