@@ -86,6 +86,7 @@ void addServices(IServiceCollection services)
     services.AddScoped<ICustomerContentPlatformConfigurationRepository, CustomerContentPlatformConfigurationRepository>();
     services.AddScoped<ICustomerRepository, CustomerRepository>();
     services.AddScoped<IdentityHelper>();
+    services.AddScoped<SymmetricEncryptionHelper>();
 }
 
 void configureJwt(IServiceCollection services)
