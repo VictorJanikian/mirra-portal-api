@@ -1,0 +1,80 @@
+<?php
+/**
+ * Plugin Name:       Mirra AI
+ * Description:       Automate content creation for your blog using top-tier generative AIs.
+ * Version:           1.0.0
+ * Author:            Victor Capobianco
+ * License:           GPL-2.0+
+ * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
+ * Text Domain:       mirra-ai
+ */
+ 
+ if ( ! defined( 'WPINC' ) ) {
+	die;
+}
+
+define( 'MIRRA_VERSION', '1.0.0' );
+
+
+function generate_custom_password() {
+    $charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    $password = '';
+
+    for ($i = 0; $i < 24; $i++) {
+        if ($i > 0 && $i % 4 == 0) {
+            $password .= ' ';
+        }
+        $password .= $charset[random_int(0, strlen($charset) - 1)];
+    }
+
+    return $password;
+}
+
+
+function create_custom_user_with_mirra_app_password() {
+	
+	if(!current_user_can('create_users') || !current_user_can('publish_posts'))
+		return;
+	
+    $username = 'mirra_user';
+    $password = generate_custom_password();
+    $email = 'novo_usuario@example.com';
+
+    // Verifica se o usuário já existe
+    if (!username_exists($username) && !email_exists($email)) {
+        $user_id = wp_create_user($username, $password, $email);
+
+        // Adiciona uma role ao usuário
+        if (!is_wp_error($user_id)) {
+            $user = new WP_User($user_id);
+            $user->set_role('author'); // Ou 'editor', 'administrator', etc.
+
+			
+            if(current_user_can('edit_users')){
+				$app_pass = WP_Application_Passwords::create_new_application_password( $user_id, array( 'name' => 'mirra_pass' ) );
+			
+				if (is_wp_error($app_pass)) {
+					return "Erro ao criar a senha de aplicação: " . $app_pass->get_error_message();
+				}
+			
+				update_option('mirra_app_password', $app_pass[0]);
+			}
+
+        } else {
+            return "Erro ao criar o usuário: " . $user_id->get_error_message();
+        }
+    } else {
+        return "Usuário já existe.";
+    }
+}
+
+
+
+function activate_mirra() {
+    create_custom_user_with_mirra_app_password();
+}
+
+register_activation_hook( __FILE__, 'activate_mirra' );
+
+
+//add_action( 'init', 'activate_mirra' );

@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36221.1 d17.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mirra Portal API", "Mirra Portal API\Mirra Portal API.csproj", "{73B070D5-60FA-478E-B4C2-4CDE175F46EA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{73B070D5-60FA-478E-B4C2-4CDE175F46EA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{73B070D5-60FA-478E-B4C2-4CDE175F46EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{73B070D5-60FA-478E-B4C2-4CDE175F46EA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{73B070D5-60FA-478E-B4C2-4CDE175F46EA}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {E410708B-0195-4516-8CBD-C7543DB90655}
+	EndGlobalSection
+EndGlobal
