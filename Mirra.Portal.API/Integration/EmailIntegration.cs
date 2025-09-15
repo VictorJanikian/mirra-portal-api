@@ -10,7 +10,7 @@ namespace Mirra_Portal_API.Integration
 
         public EmailIntegration(IConfiguration configuration)
         {
-            var connectionString = configuration["Email:ConnectionString"] ?? configuration["Email.ConnectionString"];
+            var connectionString = configuration.GetConnectionString("Email");
             _emailClient = new EmailClient(connectionString);
         }
 

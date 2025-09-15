@@ -16,7 +16,7 @@ namespace Mirra_Portal_API.Database
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseMySQL(connectionString);
+            optionsBuilder.UseSqlServer(connectionString);
 
 #if DEBUG
             optionsBuilder.EnableSensitiveDataLogging()
