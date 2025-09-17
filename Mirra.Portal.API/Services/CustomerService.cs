@@ -17,22 +17,45 @@ namespace Mirra_Portal_API.Services
             _emailService = emailService;
         }
 
-        public async Task<Customer> RegisterCustomer(Customer customer)
+        public async Task<Customer> RegisterCustomer(Customer newCustomer)
         {
-            await checkIfCustomerIsAlreadyRegistered(customer.Email);
-            customer.Password = BCrypt.Net.BCrypt.HashPassword(customer.Password);
-            var createdCustomer = await _customerRepository.Create(customer);
-            await sendActivationCodeByEmail(customer);
+            var existingCustomer = await _customerRepository.GetByEmail(newCustomer.Email);
+            ifCustomerExistsAndIsActivatedThrowsException(existingCustomer);
+            newCustomer.Password = BCrypt.Net.BCrypt.HashPassword(newCustomer.Password);
+            var createdCustomer = customerExistsButIsNotActivated(existingCustomer) ?
+                                  await updateCustomerPassword(existingCustomer, newCustomer) :
+                                  await createCustomer(newCustomer);
+            await sendActivationCodeByEmail(createdCustomer);
             return createdCustomer;
         }
 
-        private async Task checkIfCustomerIsAlreadyRegistered(string email)
+        private void ifCustomerExistsAndIsActivatedThrowsException(Customer existingCustomer)
         {
-            var existingCustomer = await _customerRepository.GetByEmail(email);
-            if (existingCustomer != null)
+            if (customerExistsAndIsActivated(existingCustomer))
             {
-                throw new BadRequestException($"Customer with email {email} already exists.");
+                throw new BadRequestException($"Customer with email {existingCustomer.Email} already exists.");
             }
+        }
+
+        private Boolean customerExistsAndIsActivated(Customer existingCustomer)
+        {
+            return existingCustomer != null && existingCustomer.IsEmailActivated == true;
+        }
+
+        private Boolean customerExistsButIsNotActivated(Customer existingCustomer)
+        {
+            return existingCustomer != null && existingCustomer.IsEmailActivated == false;
+        }
+
+        private async Task<Customer> updateCustomerPassword(Customer existingCustomer, Customer newCustomer)
+        {
+            existingCustomer.Password = newCustomer.Password;
+            return await _customerRepository.Update(existingCustomer);
+        }
+
+        private async Task<Customer> createCustomer(Customer newCustomer)
+        {
+            return await _customerRepository.Create(newCustomer);
         }
 
         private async Task sendActivationCodeByEmail(Customer customer)
