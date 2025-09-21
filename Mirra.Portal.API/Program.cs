@@ -8,6 +8,7 @@ using Mirra_Portal_API.Helper;
 using Mirra_Portal_API.Integration;
 using Mirra_Portal_API.Integration.Interfaces;
 using Mirra_Portal_API.Middleware.Identity;
+using Mirra_Portal_API.Middleware.Logging;
 using Mirra_Portal_API.Model.Responses;
 using Mirra_Portal_API.Security;
 using Mirra_Portal_API.Services;
@@ -37,6 +38,7 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.UseMiddleware<IdentityMiddleware>();
+app.UseMiddleware<LoggingMiddleware>();
 
 app.Run();
 
