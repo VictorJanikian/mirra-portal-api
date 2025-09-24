@@ -53,3 +53,6 @@ CodeCoverage/
 TestResult.xml
 nunit-*.xml
 .vs
+
+# Visual Studio Publish Profiles
+[Pp]roperties/[Pp]ublishProfiles/

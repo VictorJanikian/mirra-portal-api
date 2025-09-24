@@ -30,7 +30,7 @@ namespace Mirra_Portal_API.Integration
 
             var emailMessage = new EmailMessage(sender, emailRecipients, emailContent);
 
-            await _emailClient.SendAsync(WaitUntil.Completed, emailMessage);
+            await _emailClient.SendAsync(WaitUntil.Started, emailMessage);
         }
 
     }
