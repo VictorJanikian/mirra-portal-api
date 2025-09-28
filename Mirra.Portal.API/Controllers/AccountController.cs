@@ -52,8 +52,12 @@ namespace Mirra_Portal_API.Controllers
         {
             try
             {
-                await _emailService.ActivateEmail(request.Email, request.Code);
-                return Ok();
+                var activateResult = await _emailService.ActivateEmail(request.Email, request.Code);
+                var token = activateResult.token;
+                var customer = activateResult.customer;
+                var loginResponse = _mapper.Map<ActivateEmailResponse>(customer);
+                loginResponse.Token = token;
+                return Ok(loginResponse);
             }
             catch (BadRequestException e)
             {

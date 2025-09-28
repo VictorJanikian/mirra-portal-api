@@ -1,6 +1,7 @@
 ﻿using Mirra_Portal_API.Database.Repositories.Interfaces;
 using Mirra_Portal_API.Exceptions;
 using Mirra_Portal_API.Integration.Interfaces;
+using Mirra_Portal_API.Model;
 using Mirra_Portal_API.Services.Interfaces;
 
 namespace Mirra_Portal_API.Services
@@ -10,13 +11,15 @@ namespace Mirra_Portal_API.Services
         private readonly IEmailIntegration _emailIntegration;
         private readonly IConfiguration _configuration;
         private readonly ICustomerRepository _customerRepository;
+        private readonly ITokenService _tokenService;
 
         public EmailService(IEmailIntegration emailIntegration, IConfiguration configuration,
-            ICustomerRepository customerRepository)
+            ICustomerRepository customerRepository, ITokenService tokenService)
         {
             _emailIntegration = emailIntegration;
             _configuration = configuration;
             _customerRepository = customerRepository;
+            _tokenService = tokenService;
         }
 
         public async Task SendActivationCode(string recipientEmail, string code)
@@ -34,14 +37,14 @@ namespace Mirra_Portal_API.Services
             await _emailIntegration.SendEmail(sender, recipientEmail, subject, body);
         }
 
-        public async Task ActivateEmail(string email, string code)
+        public async Task<(Token token, Customer customer)> ActivateEmail(string email, string code)
         {
             var customer = await _customerRepository.GetByEmail(email);
             if (customer == null)
                 throw new NotFoundException($"Customer with email {email} not found.");
 
             if (customer.IsEmailActivated)
-                return;
+                throw new BadRequestException($"Customer e-mail already activated.");
 
             if (customer.EmailActivationFailedAttempts >= 5)
                 throw new BadRequestException("Too many failed attempts to activate email. Please contact support.");
@@ -49,12 +52,16 @@ namespace Mirra_Portal_API.Services
             if (code == customer.EmailActivationCode)
             {
                 await activateEmail(customer);
+                var token = _tokenService.GenerateToken(customer);
+                return (token, customer);
             }
             else
             {
                 await updateFailedAttempts(customer);
                 throwInvalidCodeException();
             }
+
+            return (new Token(), new Customer());
 
         }
 

@@ -83,6 +83,7 @@ void addServices(IServiceCollection services)
     services.AddScoped<ICustomerService, CustomerService>();
     services.AddScoped<IEmailService, EmailService>();
     services.AddScoped<ILoginService, LoginService>();
+    services.AddScoped<ITokenService, TokenService>();
     services.AddScoped<IConfigurationService, ConfigurationService>();
     services.AddScoped<IEmailIntegration, EmailIntegration>();
     services.AddScoped<ICustomerContentPlatformConfigurationRepository, CustomerContentPlatformConfigurationRepository>();
