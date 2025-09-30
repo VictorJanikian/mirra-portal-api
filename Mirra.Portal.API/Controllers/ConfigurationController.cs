@@ -24,13 +24,49 @@ namespace Mirra_Portal_API.Controllers
             _mapper = mapper;
         }
 
-        [HttpPost("platforms")]
+        [HttpPost()]
         public async Task<IActionResult> ConfigurePlatform([FromBody] PlatformConfigurationRequest request)
         {
             try
             {
-                var platformConfiguration = _mapper.Map<CustomerPlatformConfiguration>(request);
+                var platformConfiguration = _mapper.Map<CustomerContentPlatformConfiguration>(request);
                 return Ok(_mapper.Map<ConfigurationResponse>(await _configurationService.CreateConfiguration(platformConfiguration)));
+            }
+            catch (BadRequestException e)
+            {
+                return BadRequest(new ErrorResponse(e.Message));
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, new ErrorResponse("Erro interno do servidor: " + e.Message));
+            }
+        }
+
+        [HttpGet("{configurationId}/schedulings")]
+        public async Task<IActionResult> RecoverConfigurationSchedulings([FromRoute] int configurationId)
+        {
+            try
+            {
+                var schedulings = await _configurationService.GetConfigurationSchedulings(configurationId);
+                return Ok(_mapper.Map<List<SchedulingResponse>>(schedulings));
+            }
+            catch (BadRequestException e)
+            {
+                return BadRequest(new ErrorResponse(e.Message));
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, new ErrorResponse("Erro interno do servidor: " + e.Message));
+            }
+        }
+
+        [HttpGet("{configurationId}/schedulings/{schedulingId}")]
+        public async Task<IActionResult> RecoverScheduling([FromRoute] int configurationId, [FromRoute] int schedulingId)
+        {
+            try
+            {
+                var scheduling = await _configurationService.GetScheduling(configurationId, schedulingId);
+                return Ok(_mapper.Map<SchedulingResponse>(scheduling));
             }
             catch (BadRequestException e)
             {

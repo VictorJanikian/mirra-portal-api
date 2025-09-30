@@ -11,6 +11,8 @@ namespace Mirra_Portal_API.Database.Mapper
             CreateMap<Parameters, ParametersTableRow>()
                 .ForMember(row => row.CreatedAt, options => options.Ignore())
                 .AfterMap((entity, row) => row.CreatedAt = row.CreatedAt ?? DateTime.Now);
+
+            CreateMap<ParametersTableRow, Parameters>();
         }
     }
 }

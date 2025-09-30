@@ -2,7 +2,7 @@
 {
     public class Scheduling
     {
-        public CustomerPlatformConfiguration CustomerContentPlatformConfiguration { get; set; }
+        public CustomerContentPlatformConfiguration CustomerContentPlatformConfiguration { get; set; }
         public Parameters Parameters { get; set; }
         public string Interval { get; set; }
     }

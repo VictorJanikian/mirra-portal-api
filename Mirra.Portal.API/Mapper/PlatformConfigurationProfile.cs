@@ -10,10 +10,10 @@ namespace Mirra_Portal_API.Mapper
     {
         public PlatformConfigurationProfile()
         {
-            CreateMap<PlatformConfigurationRequest, CustomerPlatformConfiguration>()
+            CreateMap<PlatformConfigurationRequest, CustomerContentPlatformConfiguration>()
                 .ForMember(entity => entity.ContentPlatform, options => options.MapFrom(request => new ContentPlatform().SetId((int)request.ContentPlatformId)));
 
-            CreateMap<CustomerPlatformConfiguration, ConfigurationResponse>()
+            CreateMap<CustomerContentPlatformConfiguration, ConfigurationResponse>()
                 .ForMember(response => response.ContentPlatformId, options => options.MapFrom(entity => (EContentPlatform)entity.ContentPlatform.Id));
         }
     }

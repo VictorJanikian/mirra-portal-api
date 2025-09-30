@@ -1,6 +1,6 @@
 ﻿namespace Mirra_Portal_API.Model
 {
-    public class CustomerPlatformConfiguration : Entity
+    public class CustomerContentPlatformConfiguration : Entity
     {
         public Customer Customer { get; set; }
         public ContentPlatform ContentPlatform { get; set; }
