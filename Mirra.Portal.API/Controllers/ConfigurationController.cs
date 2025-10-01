@@ -77,5 +77,24 @@ namespace Mirra_Portal_API.Controllers
                 return StatusCode(500, new ErrorResponse("Erro interno do servidor: " + e.Message));
             }
         }
+
+        [HttpPut("{configurationId}/schedulings/{schedulingId}")]
+        public async Task<IActionResult> UpdateScheduling([FromRoute] int configurationId, [FromRoute] int schedulingId, [FromBody] SchedulingRequest schedulingRequest)
+        {
+            try
+            {
+                var scheduling = _mapper.Map<Scheduling>(schedulingRequest);
+                var updatedScheduling = await _configurationService.UpdateScheduling(configurationId, schedulingId, scheduling);
+                return Ok(_mapper.Map<SchedulingResponse>(updatedScheduling));
+            }
+            catch (BadRequestException e)
+            {
+                return BadRequest(new ErrorResponse(e.Message));
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, new ErrorResponse("Erro interno do servidor: " + e.Message));
+            }
+        }
     }
 }

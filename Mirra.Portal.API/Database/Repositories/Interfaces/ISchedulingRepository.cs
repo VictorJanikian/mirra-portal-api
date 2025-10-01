@@ -6,5 +6,6 @@ namespace Mirra_Portal_API.Database.Repositories.Interfaces
     {
         Task<List<Scheduling>> GetAllByConfigurationId(int configurationId);
         Task<Scheduling> GetById(int schedulingId);
+        Task<Scheduling> Update(Scheduling scheduling);
     }
 }

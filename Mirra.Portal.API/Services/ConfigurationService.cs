@@ -65,5 +65,12 @@ namespace Mirra_Portal_API.Services
             if (configuration == null || configuration.Customer.Id != _identityHelper.UserId())
                 throw new BadRequestException("Configuration not found.");
         }
+
+        public async Task<Scheduling> UpdateScheduling(int configurationId, int schedulingId, Scheduling scheduling)
+        {
+            await checkIfConfigurationBelongsToCustomer(configurationId);
+            scheduling.Id = schedulingId;
+            return await _schedulingRepository.Update(scheduling);
+        }
     }
 }

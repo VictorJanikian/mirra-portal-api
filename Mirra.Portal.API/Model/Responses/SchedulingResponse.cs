@@ -2,6 +2,7 @@
 {
     public class SchedulingResponse
     {
+        public int Id { get; set; }
         public string Interval { get; set; }
         public ParametersResponse Parameters { get; set; }
     }
