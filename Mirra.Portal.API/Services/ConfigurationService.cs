@@ -58,12 +58,11 @@ namespace Mirra_Portal_API.Services
             return scheduling;
         }
 
-
-        private async Task checkIfConfigurationBelongsToCustomer(int configurationId)
+        public async Task<Scheduling> CreateScheduling(int configurationId, Scheduling scheduling)
         {
-            var configuration = await _configurationRepository.GetById(configurationId);
-            if (configuration == null || configuration.Customer.Id != _identityHelper.UserId())
-                throw new BadRequestException("Configuration not found.");
+            await checkIfConfigurationBelongsToCustomer(configurationId);
+            scheduling.CustomerPlatformConfiguration = new CustomerPlatformConfiguration { Id = configurationId };
+            return await _schedulingRepository.Create(scheduling);
         }
 
         public async Task<Scheduling> UpdateScheduling(int configurationId, int schedulingId, Scheduling scheduling)
@@ -72,5 +71,16 @@ namespace Mirra_Portal_API.Services
             scheduling.Id = schedulingId;
             return await _schedulingRepository.Update(scheduling);
         }
+
+        private async Task checkIfConfigurationBelongsToCustomer(int configurationId)
+        {
+            var configuration = await _configurationRepository.GetById(configurationId);
+            if (configuration == null || configuration.Customer.Id != _identityHelper.UserId())
+                throw new BadRequestException("Configuration not found.");
+        }
+
+
+
+
     }
 }

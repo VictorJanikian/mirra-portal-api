@@ -14,6 +14,15 @@ namespace Mirra_Portal_API.Database.Repositories
         {
         }
 
+        public async Task<Scheduling> Create(Scheduling scheduling)
+        {
+            var row = _mapper.Map<SchedulingTableRow>(scheduling);
+            row.CustomerPlatformConfigurationId = scheduling.CustomerPlatformConfiguration.Id;
+            _context.Schedulings.Add(row);
+            await _context.SaveChangesAsync();
+            return _mapper.Map<Scheduling>(row);
+        }
+
         public async Task<List<Scheduling>> GetAllByConfigurationId(int configurationId)
         {
             return await _context.Schedulings

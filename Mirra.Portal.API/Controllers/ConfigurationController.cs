@@ -24,6 +24,24 @@ namespace Mirra_Portal_API.Controllers
             _mapper = mapper;
         }
 
+        [HttpPost("{configurationId}/schedulings/")]
+        public async Task<IActionResult> CreateScheduling([FromRoute] int configurationId, [FromBody] SchedulingRequest request)
+        {
+            try
+            {
+                var scheduling = _mapper.Map<Scheduling>(request);
+                return Ok(_mapper.Map<SchedulingResponse>(await _configurationService.CreateScheduling(configurationId, scheduling)));
+            }
+            catch (BadRequestException e)
+            {
+                return BadRequest(new ErrorResponse(e.Message));
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, new ErrorResponse("Erro interno do servidor: " + e.Message));
+            }
+        }
+
         [HttpPost()]
         public async Task<IActionResult> ConfigurePlatform([FromBody] PlatformConfigurationRequest request)
         {
