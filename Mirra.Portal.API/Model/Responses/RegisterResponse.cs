@@ -6,6 +6,6 @@
         public string Name { get; set; }
         public string Email { get; set; }
         public Token Token { get; set; }
-        public ContentPlatform ContentPlatform { get; set; }
+        public Platform Platform { get; set; }
     }
 }

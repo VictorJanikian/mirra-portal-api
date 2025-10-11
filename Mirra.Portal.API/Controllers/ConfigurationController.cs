@@ -29,7 +29,7 @@ namespace Mirra_Portal_API.Controllers
         {
             try
             {
-                var platformConfiguration = _mapper.Map<CustomerContentPlatformConfiguration>(request);
+                var platformConfiguration = _mapper.Map<CustomerPlatformConfiguration>(request);
                 return Ok(_mapper.Map<ConfigurationResponse>(await _configurationService.CreateConfiguration(platformConfiguration)));
             }
             catch (BadRequestException e)

@@ -1,6 +1,6 @@
 ﻿namespace Mirra_Portal_API.Enums
 {
-    public enum EContentPlatform
+    public enum EPlatform
     {
         WORDPRESS = 1
     }

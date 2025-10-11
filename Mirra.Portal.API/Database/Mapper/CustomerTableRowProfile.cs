@@ -11,17 +11,17 @@ namespace Mirra_Portal_API.Database.Mapper
             CreateMap<Customer, CustomerTableRow>()
                .ForMember(row => row.CreatedAt, options => options.Ignore())
 
-                .ForMember(row => row.ContentPlatformsConfigurations,
+                .ForMember(row => row.PlatformsConfigurations,
                     options =>
                     {
-                        options.Condition(entity => entity.ContentPlatformsConfigurations != null);
-                        options.MapFrom(entity => entity.ContentPlatformsConfigurations);
+                        options.Condition(entity => entity.PlatformsConfigurations != null);
+                        options.MapFrom(entity => entity.PlatformsConfigurations);
                     })
 
                .AfterMap((entity, row) => row.CreatedAt = row.CreatedAt ?? DateTime.Now);
 
             CreateMap<CustomerTableRow, Customer>()
-                .ForMember(entity => entity.ContentPlatformsConfigurations, options => options.Ignore());
+                .ForMember(entity => entity.PlatformsConfigurations, options => options.Ignore());
         }
     }
 }

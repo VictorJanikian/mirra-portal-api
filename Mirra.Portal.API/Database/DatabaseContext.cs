@@ -26,9 +26,9 @@ namespace Mirra_Portal_API.Database
         }
 
         public DbSet<CustomerTableRow> Customers => Set<CustomerTableRow>();
-        public DbSet<ContentPlatformTableRow> ContentPlatforms => Set<ContentPlatformTableRow>();
+        public DbSet<PlatformTableRow> Platforms => Set<PlatformTableRow>();
         public DbSet<ParametersTableRow> Parameters => Set<ParametersTableRow>();
-        public DbSet<CustomerContentPlatformConfigurationTableRow> CustomerContentPlatformsConfiguration => Set<CustomerContentPlatformConfigurationTableRow>();
+        public DbSet<CustomerPlatformConfigurationTableRow> CustomerPlatformsConfiguration => Set<CustomerPlatformConfigurationTableRow>();
         public DbSet<SchedulingTableRow> Schedulings => Set<SchedulingTableRow>();
 
     }

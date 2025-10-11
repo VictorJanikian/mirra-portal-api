@@ -9,12 +9,12 @@ namespace Mirra_Portal_API.Services
 {
     public class ConfigurationService : IConfigurationService
     {
-        ICustomerContentPlatformConfigurationRepository _configurationRepository;
+        ICustomerPlatformConfigurationRepository _configurationRepository;
         ISchedulingRepository _schedulingRepository;
         IdentityHelper _identityHelper;
         SymmetricEncryptionHelper _symmetricEncryptionHelper;
 
-        public ConfigurationService(ICustomerContentPlatformConfigurationRepository configurationRepository,
+        public ConfigurationService(ICustomerPlatformConfigurationRepository configurationRepository,
                                     IdentityHelper identityHelper,
                                     SymmetricEncryptionHelper symmetricEncryptionHelper,
                                     ISchedulingRepository schedulingRepository)
@@ -25,7 +25,7 @@ namespace Mirra_Portal_API.Services
             _schedulingRepository = schedulingRepository;
         }
 
-        public async Task<CustomerContentPlatformConfiguration> CreateConfiguration(CustomerContentPlatformConfiguration configuration)
+        public async Task<CustomerPlatformConfiguration> CreateConfiguration(CustomerPlatformConfiguration configuration)
         {
             validateIntervals(configuration);
             configuration.Customer = new Customer { Id = _identityHelper.UserId() };
@@ -34,7 +34,7 @@ namespace Mirra_Portal_API.Services
         }
 
 
-        private void validateIntervals(CustomerContentPlatformConfiguration configuration)
+        private void validateIntervals(CustomerPlatformConfiguration configuration)
         {
             foreach (var schedule in configuration.Schedulings)
             {
@@ -53,7 +53,7 @@ namespace Mirra_Portal_API.Services
         {
             await checkIfConfigurationBelongsToCustomer(configurationId);
             var scheduling = await _schedulingRepository.GetById(schedulingId);
-            if (scheduling == null || scheduling.CustomerContentPlatformConfiguration.Id != configurationId)
+            if (scheduling == null || scheduling.CustomerPlatformConfiguration.Id != configurationId)
                 throw new BadRequestException("Scheduling not found.");
             return scheduling;
         }

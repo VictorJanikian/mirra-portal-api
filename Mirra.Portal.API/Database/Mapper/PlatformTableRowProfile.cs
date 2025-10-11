@@ -8,8 +8,8 @@ namespace Mirra_Portal_API.Database.Mapper
     {
         public PlatformTableRowProfile()
         {
-            CreateMap<ContentPlatformTableRow, ContentPlatform>();
-            CreateMap<ContentPlatform, ContentPlatformTableRow>();
+            CreateMap<PlatformTableRow, Platform>();
+            CreateMap<Platform, PlatformTableRow>();
         }
     }
 }

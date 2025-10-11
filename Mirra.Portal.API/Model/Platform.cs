@@ -1,6 +1,6 @@
 ﻿namespace Mirra_Portal_API.Model
 {
-    public class ContentPlatform : Entity
+    public class Platform : Entity
     {
         public string Name { get; set; }
         public string Prompt { get; set; }

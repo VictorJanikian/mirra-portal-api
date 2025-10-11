@@ -18,7 +18,7 @@ namespace Mirra_Portal_API.Database.Repositories
         {
             return await _context.Schedulings
                 .AsNoTracking()
-                .Where(scheduling => scheduling.CustomerContentPlatformConfigurationId == configurationId)
+                .Where(scheduling => scheduling.CustomerPlatformConfigurationId == configurationId)
                 .ProjectTo<Scheduling>(_mapper.ConfigurationProvider)
                 .ToListAsync();
         }
@@ -43,24 +43,21 @@ namespace Mirra_Portal_API.Database.Repositories
 
             var savedParameters = _mapper.Map<Parameters>(row.Parameters);
 
+            var oldSavedParametersId = savedParameters.Id;
             savedParameters.Id = 0; // To avoid issues with comparing the IDs
             if (savedParameters != scheduling.Parameters)
-                await createNewParametersRow(scheduling, row);
+                row.Parameters = _mapper.Map<ParametersTableRow>(scheduling.Parameters);
+            else
+            {
+                savedParameters.Id = oldSavedParametersId;
+                scheduling.Parameters = savedParameters;
+            }
 
             _mapper.Map(scheduling, row);
 
             await _context.SaveChangesAsync();
 
             return _mapper.Map(row, scheduling);
-        }
-
-        private async Task createNewParametersRow(Scheduling scheduling, SchedulingTableRow row)
-        {
-            var newParametersRow = _mapper.Map<ParametersTableRow>(scheduling.Parameters);
-            row.Parameters = newParametersRow;
-            _context.Parameters.Add(newParametersRow);
-            await _context.SaveChangesAsync();
-            row.ParametersId = newParametersRow.Id;
         }
     }
 }

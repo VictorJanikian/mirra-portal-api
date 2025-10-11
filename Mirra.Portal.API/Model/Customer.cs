@@ -8,6 +8,6 @@
         public Boolean IsEmailActivated { get; set; }
         public string? EmailActivationCode { get; set; }
         public int? EmailActivationFailedAttempts { get; set; }
-        public List<CustomerContentPlatformConfiguration> ContentPlatformsConfigurations { get; set; }
+        public List<CustomerPlatformConfiguration> PlatformsConfigurations { get; set; }
     }
 }

@@ -5,8 +5,8 @@ namespace Mirra_Portal_API.Database.DBEntities
     [Table("schedulings")]
     public class SchedulingTableRow : EntityTableRow
     {
-        public int CustomerContentPlatformConfigurationId { get; set; }
-        public CustomerContentPlatformConfigurationTableRow CustomerContentPlatformConfiguration { get; set; }
+        public int CustomerPlatformConfigurationId { get; set; }
+        public CustomerPlatformConfigurationTableRow CustomerPlatformConfiguration { get; set; }
         public int ParametersId { get; set; }
         public ParametersTableRow Parameters { get; set; }
         public string Interval { get; set; }
