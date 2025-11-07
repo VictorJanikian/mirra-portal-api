@@ -36,6 +36,10 @@ namespace Mirra_Portal_API.Controllers
             {
                 return BadRequest(new ErrorResponse(e.Message));
             }
+            catch (NotFoundException e)
+            {
+                return NotFound(new ErrorResponse(e.Message));
+            }
             catch (Exception e)
             {
                 return StatusCode(500, new ErrorResponse("Erro interno do servidor: " + e.Message));
@@ -53,6 +57,10 @@ namespace Mirra_Portal_API.Controllers
             catch (BadRequestException e)
             {
                 return BadRequest(new ErrorResponse(e.Message));
+            }
+            catch (NotFoundException e)
+            {
+                return NotFound(new ErrorResponse(e.Message));
             }
             catch (Exception e)
             {
@@ -72,6 +80,10 @@ namespace Mirra_Portal_API.Controllers
             {
                 return BadRequest(new ErrorResponse(e.Message));
             }
+            catch (NotFoundException e)
+            {
+                return NotFound(new ErrorResponse(e.Message));
+            }
             catch (Exception e)
             {
                 return StatusCode(500, new ErrorResponse("Erro interno do servidor: " + e.Message));
@@ -89,6 +101,10 @@ namespace Mirra_Portal_API.Controllers
             catch (BadRequestException e)
             {
                 return BadRequest(new ErrorResponse(e.Message));
+            }
+            catch (NotFoundException e)
+            {
+                return NotFound(new ErrorResponse(e.Message));
             }
             catch (Exception e)
             {
@@ -108,6 +124,32 @@ namespace Mirra_Portal_API.Controllers
             catch (BadRequestException e)
             {
                 return BadRequest(new ErrorResponse(e.Message));
+            }
+            catch (NotFoundException e)
+            {
+                return NotFound(new ErrorResponse(e.Message));
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, new ErrorResponse("Erro interno do servidor: " + e.Message));
+            }
+        }
+
+        [HttpDelete("{configurationId}/schedulings/{schedulingId}")]
+        public async Task<IActionResult> RemoveScheduling([FromRoute] int configurationId, [FromRoute] int schedulingId)
+        {
+            try
+            {
+                await _configurationService.DeleteScheduling(configurationId, schedulingId);
+                return Ok();
+            }
+            catch (BadRequestException e)
+            {
+                return BadRequest(new ErrorResponse(e.Message));
+            }
+            catch (NotFoundException e)
+            {
+                return NotFound(new ErrorResponse(e.Message));
             }
             catch (Exception e)
             {

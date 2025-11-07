@@ -8,5 +8,6 @@ namespace Mirra_Portal_API.Database.Repositories.Interfaces
         Task<Scheduling> GetById(int schedulingId);
         Task<Scheduling> Create(Scheduling scheduling);
         Task<Scheduling> Update(Scheduling scheduling);
+        Task Delete(int schedulingId);
     }
 }

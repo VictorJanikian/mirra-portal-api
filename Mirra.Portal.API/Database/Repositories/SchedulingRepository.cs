@@ -23,6 +23,7 @@ namespace Mirra_Portal_API.Database.Repositories
             return _mapper.Map<Scheduling>(row);
         }
 
+
         public async Task<List<Scheduling>> GetAllByConfigurationId(int configurationId)
         {
             return await _context.Schedulings
@@ -45,11 +46,22 @@ namespace Mirra_Portal_API.Database.Repositories
         {
             var row = _context.Schedulings
                 .Where(databaseScheduling => databaseScheduling.Id == scheduling.Id)
-                .Include(scheduling => scheduling.Parameters)
+                .Include(databaseScheduling => databaseScheduling.Parameters)
                 .FirstOrDefault();
 
             if (row == null) throw new BadRequestException("Scheduling not found.");
 
+            updateRowParametersIfTheyDifferFromIncoming(scheduling, row);
+
+            _mapper.Map(scheduling, row);
+
+            await _context.SaveChangesAsync();
+
+            return _mapper.Map(row, scheduling);
+        }
+
+        private void updateRowParametersIfTheyDifferFromIncoming(Scheduling scheduling, SchedulingTableRow row)
+        {
             var savedParameters = _mapper.Map<Parameters>(row.Parameters);
 
             var oldSavedParametersId = savedParameters.Id;
@@ -61,12 +73,13 @@ namespace Mirra_Portal_API.Database.Repositories
                 savedParameters.Id = oldSavedParametersId;
                 scheduling.Parameters = savedParameters;
             }
+        }
 
-            _mapper.Map(scheduling, row);
-
-            await _context.SaveChangesAsync();
-
-            return _mapper.Map(row, scheduling);
+        public async Task Delete(int schedulingId)
+        {
+            await _context.Schedulings
+                .Where(scheduling => scheduling.Id == schedulingId)
+                .ExecuteDeleteAsync();
         }
     }
 }
