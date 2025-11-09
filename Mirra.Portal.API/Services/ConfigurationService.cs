@@ -103,6 +103,9 @@ namespace Mirra_Portal_API.Services
                 throw new NotFoundException("Scheduling not found.");
         }
 
-
+        public async Task<List<CustomerPlatformConfiguration>> GetAllConfigurations()
+        {
+            return await _configurationRepository.GetAllForCustomer(_identityHelper.UserId());
+        }
     }
 }

@@ -23,6 +23,15 @@ namespace Mirra_Portal_API.Database.Repositories
             return configuration;
         }
 
+        public Task<List<CustomerPlatformConfiguration>> GetAllForCustomer(int customerId)
+        {
+            return _context.CustomerPlatformsConfiguration
+                .AsNoTracking()
+                .Where(configuration => configuration.CustomerId == customerId)
+                .ProjectTo<CustomerPlatformConfiguration>(_mapper.ConfigurationProvider)
+                .ToListAsync();
+        }
+
         public async Task<CustomerPlatformConfiguration> GetById(int id)
         {
             return await _context.CustomerPlatformsConfiguration

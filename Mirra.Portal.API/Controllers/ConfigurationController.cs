@@ -90,6 +90,29 @@ namespace Mirra_Portal_API.Controllers
             }
         }
 
+        [HttpGet()]
+        public async Task<IActionResult> RecoverAllConfigurations()
+        {
+            try
+            {
+                var configurations = await _configurationService.GetAllConfigurations();
+
+                return Ok(_mapper.Map<List<ConfigurationResponse>>(configurations));
+            }
+            catch (BadRequestException e)
+            {
+                return BadRequest(new ErrorResponse(e.Message));
+            }
+            catch (NotFoundException e)
+            {
+                return NotFound(new ErrorResponse(e.Message));
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, new ErrorResponse("Erro interno do servidor: " + e.Message));
+            }
+        }
+
         [HttpGet("{configurationId}/schedulings/{schedulingId}")]
         public async Task<IActionResult> RecoverScheduling([FromRoute] int configurationId, [FromRoute] int schedulingId)
         {

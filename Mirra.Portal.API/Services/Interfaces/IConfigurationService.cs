@@ -6,6 +6,7 @@ namespace Mirra_Portal_API.Services.Interfaces
     {
         public Task<CustomerPlatformConfiguration> CreateConfiguration(CustomerPlatformConfiguration configuration);
         public Task<List<Scheduling>> GetConfigurationSchedulings(int configurationId);
+        public Task<List<CustomerPlatformConfiguration>> GetAllConfigurations();
         public Task<Scheduling> CreateScheduling(int configurationId, Scheduling scheduling);
         public Task<Scheduling> GetScheduling(int configurationId, int schedulingId);
         public Task<Scheduling> UpdateScheduling(int configurationId, int schedulingId, Scheduling scheduling);

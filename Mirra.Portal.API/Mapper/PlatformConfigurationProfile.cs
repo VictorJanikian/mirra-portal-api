@@ -15,6 +15,7 @@ namespace Mirra_Portal_API.Mapper
 
             CreateMap<CustomerPlatformConfiguration, ConfigurationResponse>()
                 .ForMember(response => response.PlatformId, options => options.MapFrom(entity => (EPlatform)entity.Platform.Id));
+
         }
     }
 }
