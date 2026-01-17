@@ -15,6 +15,8 @@ namespace Mirra_Portal_API.Database.DBEntities
         public string? Categories { get; set; }
         public string? Tags { get; set; }
         public string? SEOAdditionalInformation { get; set; }
+        public string? Description { get; set; }
+        public string? SearchIntent { get; set; }
         public bool? IsDraft { get; set; }
         public string Language { get; set; }
         public DateTime? CreatedAt { get; set; }

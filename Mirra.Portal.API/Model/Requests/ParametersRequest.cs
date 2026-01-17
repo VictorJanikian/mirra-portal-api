@@ -10,6 +10,8 @@
         public string ApproximatedSize { get; set; }
         public string AdditionalInfo { get; set; }
         public string SEOAdditionalInformation { get; set; }
+        public string Description { get; set; }
+        public string SearchIntent { get; set; }
         public string Language { get; set; }
     }
 }
