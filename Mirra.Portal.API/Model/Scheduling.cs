@@ -6,5 +6,7 @@
         public CustomerPlatformConfiguration CustomerPlatformConfiguration { get; set; }
         public Parameters Parameters { get; set; }
         public string Interval { get; set; }
+        public int? RunsPerWeek { get; set; }
+
     }
 }

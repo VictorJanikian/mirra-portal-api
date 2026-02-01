@@ -10,6 +10,7 @@ namespace Mirra_Portal_API.Database.DBEntities
         public int ParametersId { get; set; }
         public ParametersTableRow Parameters { get; set; }
         public string Interval { get; set; }
+        public int RunsPerWeek { get; set; }
         public DateTime? CreatedAt { get; set; }
     }
 }
