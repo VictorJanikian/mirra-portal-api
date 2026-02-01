@@ -12,6 +12,10 @@ namespace Mirra_Portal_API.Database.DBEntities
         public Boolean IsEmailActivated { get; set; }
         public string? EmailActivationCode { get; set; }
         public int? EmailActivationFailedAttempts { get; set; }
+        public SubscriptionPlanTableRow SubscriptionPlan { get; set; }
+        public int SubscriptionPlanId { get; set; }
         public DateTime? CreatedAt { get; set; }
+
+
     }
 }

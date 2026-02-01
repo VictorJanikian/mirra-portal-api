@@ -85,6 +85,7 @@ void addServices(IServiceCollection services)
     services.AddScoped<ILoginService, LoginService>();
     services.AddScoped<ITokenService, TokenService>();
     services.AddScoped<IConfigurationService, ConfigurationService>();
+    services.AddScoped<ISubscriptionPlanEvaluator, SubscriptionPlanEvaluator>();
     services.AddScoped<IEmailIntegration, EmailIntegration>();
     services.AddScoped<ICustomerPlatformConfigurationRepository, CustomerPlatformConfigurationRepository>();
     services.AddScoped<ICustomerRepository, CustomerRepository>();

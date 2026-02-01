@@ -34,6 +34,20 @@ namespace Mirra_Portal_API.Database.Repositories
 
         }
 
+
+        public async Task<Customer> GetByConfigurationId(int configurationId)
+        {
+            var row = await _context.Customers
+                .AsNoTracking()
+                .Where(customer => customer.PlatformsConfigurations.Any(platformConfiguration =>
+                        platformConfiguration.Id == configurationId))
+                .Include(customer => customer.SubscriptionPlan)
+                .FirstOrDefaultAsync();
+
+            return _mapper.Map<Customer>(row);
+        }
+
+
         public async Task<Customer> Update(Customer customer)
         {
             var row = await _context.Customers

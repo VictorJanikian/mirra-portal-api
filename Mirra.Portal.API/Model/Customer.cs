@@ -9,5 +9,6 @@
         public string? EmailActivationCode { get; set; }
         public int? EmailActivationFailedAttempts { get; set; }
         public List<CustomerPlatformConfiguration> PlatformsConfigurations { get; set; }
+        public SubscriptionPlan SubscriptionPlan { get; set; }
     }
 }

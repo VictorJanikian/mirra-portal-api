@@ -30,6 +30,8 @@ namespace Mirra_Portal_API.Database
         public DbSet<ParametersTableRow> Parameters => Set<ParametersTableRow>();
         public DbSet<CustomerPlatformConfigurationTableRow> CustomerPlatformsConfiguration => Set<CustomerPlatformConfigurationTableRow>();
         public DbSet<SchedulingTableRow> Schedulings => Set<SchedulingTableRow>();
+        public DbSet<SubscriptionPlanTableRow> SubscriptionPlans => Set<SubscriptionPlanTableRow>();
+
 
     }
 }

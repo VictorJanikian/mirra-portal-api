@@ -11,18 +11,24 @@ namespace Mirra_Portal_API.Services
     {
         ICustomerPlatformConfigurationRepository _configurationRepository;
         ISchedulingRepository _schedulingRepository;
+        ICustomerRepository _customerRepository;
         IdentityHelper _identityHelper;
         SymmetricEncryptionHelper _symmetricEncryptionHelper;
+        ISubscriptionPlanEvaluator _subscriptionPlanEvaluator;
 
         public ConfigurationService(ICustomerPlatformConfigurationRepository configurationRepository,
                                     IdentityHelper identityHelper,
                                     SymmetricEncryptionHelper symmetricEncryptionHelper,
-                                    ISchedulingRepository schedulingRepository)
+                                    ISchedulingRepository schedulingRepository,
+                                    ICustomerRepository customerRepository,
+                                    ISubscriptionPlanEvaluator subscriptionPlanEvaluator)
         {
             _configurationRepository = configurationRepository;
             _identityHelper = identityHelper;
             _symmetricEncryptionHelper = symmetricEncryptionHelper;
             _schedulingRepository = schedulingRepository;
+            _customerRepository = customerRepository;
+            _subscriptionPlanEvaluator = subscriptionPlanEvaluator;
         }
 
         public async Task<CustomerPlatformConfiguration> CreateConfiguration(CustomerPlatformConfiguration configuration)
@@ -39,6 +45,10 @@ namespace Mirra_Portal_API.Services
             validateInterval(scheduling);
             await checkIfConfigurationBelongsToCustomer(configurationId);
             scheduling.RunsPerWeek = CalculateMaxRunsPerWeek(scheduling.Interval);
+            var customer = await getCustomerByConfigurationId(configurationId);
+            var schedulingAllowed = _subscriptionPlanEvaluator.checkIfRunsPerWeekAreAllowedInCustomerCurrentPlan(customer, scheduling.RunsPerWeek);
+            if (!schedulingAllowed)
+                throw new SubscriptionException("The number of scheduling runs per week exceeds the limit of your current subscription plan.");
             scheduling.CustomerPlatformConfiguration = new CustomerPlatformConfiguration { Id = configurationId };
             return await _schedulingRepository.Create(scheduling);
         }
@@ -225,6 +235,11 @@ namespace Mirra_Portal_API.Services
             var scheduling = await _schedulingRepository.GetById(schedulingId);
             if (scheduling == null || scheduling.CustomerPlatformConfiguration.Id != configurationId)
                 throw new NotFoundException("Scheduling not found.");
+        }
+
+        private async Task<Customer> getCustomerByConfigurationId(int configurationId)
+        {
+            return await _customerRepository.GetByConfigurationId(configurationId);
         }
 
         public async Task<List<CustomerPlatformConfiguration>> GetAllConfigurations()
