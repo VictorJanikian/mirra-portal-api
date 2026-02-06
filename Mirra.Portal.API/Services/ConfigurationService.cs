@@ -55,6 +55,8 @@ namespace Mirra_Portal_API.Services
 
         private void validateIntervals(CustomerPlatformConfiguration configuration)
         {
+            if (configuration.Schedulings == null) return;
+
             foreach (var schedule in configuration.Schedulings)
             {
                 if (!CronExpression.TryParse(schedule.Interval, CronFormat.Standard, out _))

@@ -16,7 +16,9 @@ namespace Mirra_Portal_API.Database.Repositories
         public async Task<CustomerPlatformConfiguration> Create(CustomerPlatformConfiguration configuration)
         {
             var row = _mapper.Map<CustomerPlatformConfigurationTableRow>(configuration);
-            row.Schedulings = _mapper.Map<List<SchedulingTableRow>>(configuration.Schedulings);
+            if (configuration.Schedulings != null)
+                row.Schedulings = _mapper.Map<List<SchedulingTableRow>>(configuration.Schedulings);
+
             _context.CustomerPlatformsConfiguration.Add(row);
             await _context.SaveChangesAsync();
             configuration.Id = row.Id;
