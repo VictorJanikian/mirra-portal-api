@@ -8,6 +8,7 @@ namespace Mirra_Portal_API.Database.DBEntities
         public int CustomerId { get; set; }
         public CustomerTableRow Customer { get; set; }
         public int PlatformId { get; set; }
+        public string PlatformName { get; set; }
         public PlatformTableRow Platform { get; set; }
         public string Url { get; set; }
         public string Username { get; set; }
