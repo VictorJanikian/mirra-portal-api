@@ -1,4 +1,5 @@
-﻿using Mirra_Portal_API.Model;
+﻿using Mirra_Portal_API.Enums;
+using Mirra_Portal_API.Model;
 
 namespace Mirra_Portal_API.Database.Repositories.Interfaces
 {
@@ -9,5 +10,6 @@ namespace Mirra_Portal_API.Database.Repositories.Interfaces
         Task<Scheduling> Create(Scheduling scheduling);
         Task<Scheduling> Update(Scheduling scheduling);
         Task Delete(int schedulingId);
+        Task<bool> HasAnyByCustomerIdAndStatus(int customerId, ESchedulingStatus status);
     }
 }

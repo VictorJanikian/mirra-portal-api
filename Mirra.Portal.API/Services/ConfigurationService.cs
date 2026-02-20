@@ -3,6 +3,7 @@ using Mirra_Portal_API.Database.Repositories.Interfaces;
 using Mirra_Portal_API.Exceptions;
 using Mirra_Portal_API.Helper;
 using Mirra_Portal_API.Model;
+using Mirra_Portal_API.Enums;
 using Mirra_Portal_API.Services.Interfaces;
 
 namespace Mirra_Portal_API.Services
@@ -247,6 +248,13 @@ namespace Mirra_Portal_API.Services
         public async Task<List<CustomerPlatformConfiguration>> GetAllConfigurations()
         {
             return await _configurationRepository.GetAllForCustomer(_identityHelper.UserId());
+        }
+
+        public async Task<bool> HasSuspendedSchedulingsDueToLackOfPayment()
+        {
+            return await _schedulingRepository.HasAnyByCustomerIdAndStatus(
+                _identityHelper.UserId(),
+                ESchedulingStatus.SUSPENDED_DUE_TO_LACK_PAYMENT);
         }
     }
 }

@@ -158,6 +158,8 @@ namespace Mirra_Portal_API.Controllers
             }
         }
 
+
+
         [HttpDelete("{configurationId}/schedulings/{schedulingId}")]
         public async Task<IActionResult> RemoveScheduling([FromRoute] int configurationId, [FromRoute] int schedulingId)
         {

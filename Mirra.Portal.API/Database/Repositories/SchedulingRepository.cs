@@ -3,6 +3,7 @@ using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 using Mirra_Portal_API.Database.DBEntities;
 using Mirra_Portal_API.Database.Repositories.Interfaces;
+using Mirra_Portal_API.Enums;
 using Mirra_Portal_API.Exceptions;
 using Mirra_Portal_API.Model;
 
@@ -80,6 +81,14 @@ namespace Mirra_Portal_API.Database.Repositories
             await _context.Schedulings
                 .Where(scheduling => scheduling.Id == schedulingId)
                 .ExecuteDeleteAsync();
+        }
+
+        public async Task<bool> HasAnyByCustomerIdAndStatus(int customerId, ESchedulingStatus status)
+        {
+            return await _context.Schedulings
+                .AsNoTracking()
+                .AnyAsync(scheduling => scheduling.CustomerPlatformConfiguration.CustomerId == customerId
+                    && scheduling.SchedulingStatus.Id == (int)status);
         }
     }
 }
