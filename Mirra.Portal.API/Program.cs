@@ -11,6 +11,7 @@ using Mirra_Portal_API.Middleware.Identity;
 using Mirra_Portal_API.Middleware.Logging;
 using Mirra_Portal_API.Model.Responses;
 using Mirra_Portal_API.Security;
+using Mirra_Portal_API.Model;
 using Mirra_Portal_API.Services;
 using Mirra_Portal_API.Services.Interfaces;
 
@@ -26,6 +27,7 @@ addDatabaseContext(builder.Services);
 addAutoMapper(builder.Services);
 addServices(builder.Services);
 configureJwt(builder.Services);
+builder.Services.Configure<StripeSettings>(configuration.GetSection("Stripe"));
 
 var app = builder.Build();
 
@@ -84,8 +86,10 @@ void addServices(IServiceCollection services)
     services.AddScoped<IEmailService, EmailService>();
     services.AddScoped<ILoginService, LoginService>();
     services.AddScoped<ITokenService, TokenService>();
+    services.AddScoped<ICronService, CronService>();
     services.AddScoped<IConfigurationService, ConfigurationService>();
     services.AddScoped<ISubscriptionPlanEvaluator, SubscriptionPlanEvaluator>();
+    services.AddScoped<IStripeWebhookService, StripeWebhookService>();
     services.AddScoped<IEmailIntegration, EmailIntegration>();
     services.AddScoped<ICustomerPlatformConfigurationRepository, CustomerPlatformConfigurationRepository>();
     services.AddScoped<ICustomerRepository, CustomerRepository>();

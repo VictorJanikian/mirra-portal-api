@@ -30,7 +30,7 @@ namespace Mirra_Portal_API.Controllers
             try
             {
                 var scheduling = _mapper.Map<Scheduling>(request);
-                return Ok(_mapper.Map<SchedulingResponse>(await _configurationService.CreateScheduling(configurationId, scheduling)));
+                return Ok(_mapper.Map<SchedulingResponse>(await _configurationService.CreateSchedule(configurationId, scheduling)));
             }
             catch (BadRequestException e)
             {
@@ -73,7 +73,7 @@ namespace Mirra_Portal_API.Controllers
         {
             try
             {
-                var schedulings = await _configurationService.GetConfigurationSchedulings(configurationId);
+                var schedulings = await _configurationService.GetConfigurationSchedules(configurationId);
                 return Ok(_mapper.Map<List<SchedulingResponse>>(schedulings));
             }
             catch (BadRequestException e)
@@ -118,7 +118,7 @@ namespace Mirra_Portal_API.Controllers
         {
             try
             {
-                var scheduling = await _configurationService.GetScheduling(configurationId, schedulingId);
+                var scheduling = await _configurationService.GetSchedule(configurationId, schedulingId);
                 return Ok(_mapper.Map<SchedulingResponse>(scheduling));
             }
             catch (BadRequestException e)
@@ -141,7 +141,7 @@ namespace Mirra_Portal_API.Controllers
             try
             {
                 var scheduling = _mapper.Map<Scheduling>(schedulingRequest);
-                var updatedScheduling = await _configurationService.UpdateScheduling(configurationId, schedulingId, scheduling);
+                var updatedScheduling = await _configurationService.UpdateSchedule(configurationId, schedulingId, scheduling);
                 return Ok(_mapper.Map<SchedulingResponse>(updatedScheduling));
             }
             catch (BadRequestException e)
@@ -165,7 +165,7 @@ namespace Mirra_Portal_API.Controllers
         {
             try
             {
-                await _configurationService.DeleteScheduling(configurationId, schedulingId);
+                await _configurationService.DeleteSchedule(configurationId, schedulingId);
                 return Ok();
             }
             catch (BadRequestException e)

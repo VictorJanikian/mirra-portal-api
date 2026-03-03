@@ -1,9 +1,9 @@
 ﻿using Cronos;
 using Mirra_Portal_API.Database.Repositories.Interfaces;
+using Mirra_Portal_API.Enums;
 using Mirra_Portal_API.Exceptions;
 using Mirra_Portal_API.Helper;
 using Mirra_Portal_API.Model;
-using Mirra_Portal_API.Enums;
 using Mirra_Portal_API.Services.Interfaces;
 
 namespace Mirra_Portal_API.Services
@@ -16,13 +16,15 @@ namespace Mirra_Portal_API.Services
         IdentityHelper _identityHelper;
         SymmetricEncryptionHelper _symmetricEncryptionHelper;
         ISubscriptionPlanEvaluator _subscriptionPlanEvaluator;
+        ICronService _cronService;
 
         public ConfigurationService(ICustomerPlatformConfigurationRepository configurationRepository,
                                     IdentityHelper identityHelper,
                                     SymmetricEncryptionHelper symmetricEncryptionHelper,
                                     ISchedulingRepository schedulingRepository,
                                     ICustomerRepository customerRepository,
-                                    ISubscriptionPlanEvaluator subscriptionPlanEvaluator)
+                                    ISubscriptionPlanEvaluator subscriptionPlanEvaluator,
+                                    ICronService cronService)
         {
             _configurationRepository = configurationRepository;
             _identityHelper = identityHelper;
@@ -30,31 +32,44 @@ namespace Mirra_Portal_API.Services
             _schedulingRepository = schedulingRepository;
             _customerRepository = customerRepository;
             _subscriptionPlanEvaluator = subscriptionPlanEvaluator;
+            _cronService = cronService;
         }
 
         public async Task<CustomerPlatformConfiguration> CreateConfiguration(CustomerPlatformConfiguration configuration)
         {
-            validateIntervals(configuration);
+            validateIntervalsFormat(configuration);
+
+            var customer = await _customerRepository.GetById(_identityHelper.UserId());
+            var customerConfigurations = await _configurationRepository.GetAllForCustomer(_identityHelper.UserId());
+
+            validateIfNumberOfConnectionsExceedsMaximumAllowedForCustomer(customer, customerConfigurations);
+            validateIfIntervalsExceedMaximumAllowedForCustomer(customer, configuration);
+
             configuration.Customer = new Customer { Id = _identityHelper.UserId() };
             configuration.Password = _symmetricEncryptionHelper.Encrypt(configuration.Password);
             return await _configurationRepository.Create(configuration);
         }
 
-
-        public async Task<Scheduling> CreateScheduling(int configurationId, Scheduling scheduling)
+        private void validateIfNumberOfConnectionsExceedsMaximumAllowedForCustomer(Customer customer, List<CustomerPlatformConfiguration> customerConfigurations)
         {
-            validateInterval(scheduling);
+            var numberOfPlatformsConnectedAreAllowedInCustomerCurrentPlan = _subscriptionPlanEvaluator
+                            .checkIfNumberOfConfigurationsAreAllowedInCustomerCurrentPlan(customer, customerConfigurations.Count() + 1);
+            if (!numberOfPlatformsConnectedAreAllowedInCustomerCurrentPlan)
+                throw new BadRequestException("The number of platforms connected exceeds the limit of your current subscription plan.");
+        }
+
+        public async Task<Scheduling> CreateSchedule(int configurationId, Scheduling scheduling)
+        {
+            validateIntervalFormat(scheduling);
             await checkIfConfigurationBelongsToCustomer(configurationId);
-            scheduling.RunsPerWeek = CalculateMaxRunsPerWeek(scheduling.Interval);
+            scheduling.RunsPerWeek = _cronService.CalculateMaxRunsPerWeek(scheduling.Interval);
             var customer = await getCustomerByConfigurationId(configurationId);
-            var schedulingAllowed = _subscriptionPlanEvaluator.checkIfRunsPerWeekAreAllowedInCustomerCurrentPlan(customer, scheduling.RunsPerWeek);
-            if (!schedulingAllowed)
-                throw new SubscriptionException("The number of scheduling runs per week exceeds the limit of your current subscription plan.");
+            await validateIfIntervalExceedMaximumAllowedForCustomer(customer, configurationId, scheduling);
             scheduling.CustomerPlatformConfiguration = new CustomerPlatformConfiguration { Id = configurationId };
             return await _schedulingRepository.Create(scheduling);
         }
 
-        private void validateIntervals(CustomerPlatformConfiguration configuration)
+        private void validateIntervalsFormat(CustomerPlatformConfiguration configuration)
         {
             if (configuration.Schedulings == null) return;
 
@@ -65,142 +80,55 @@ namespace Mirra_Portal_API.Services
             }
         }
 
-        private void validateInterval(Scheduling scheduling)
+        private async Task validateIfIntervalExceedMaximumAllowedForCustomer(Customer customer, int configurationId, Scheduling newSchedule)
+        {
+            var configuration = await _configurationRepository.GetById(configurationId);
+
+            int totalRunsPerWeek = 0;
+
+            foreach (var schedule in configuration.Schedulings)
+                totalRunsPerWeek += _cronService.CalculateMaxRunsPerWeek(schedule.Interval);
+
+            totalRunsPerWeek += _cronService.CalculateMaxRunsPerWeek(newSchedule.Interval);
+
+            var isAllowed = _subscriptionPlanEvaluator
+                .checkIfRunsPerWeekAreAllowedInCustomerCurrentPlan(customer, totalRunsPerWeek);
+
+            if (!isAllowed)
+                throw new SubscriptionException("Your current plan does not allow the intended number of runs per week.");
+
+        }
+
+        private void validateIfIntervalsExceedMaximumAllowedForCustomer(Customer customer, CustomerPlatformConfiguration configuration)
+        {
+
+            if (configuration.Schedulings == null) return;
+
+            int totalRunsPerWeek = 0;
+
+            foreach (var schedule in configuration.Schedulings)
+                totalRunsPerWeek += _cronService.CalculateMaxRunsPerWeek(schedule.Interval);
+
+            var isAllowed = _subscriptionPlanEvaluator
+                .checkIfRunsPerWeekAreAllowedInCustomerCurrentPlan(customer, totalRunsPerWeek);
+
+            if (!isAllowed)
+                throw new SubscriptionException("Your current plan does not allow the intended number of runs per week.");
+        }
+
+        private void validateIntervalFormat(Scheduling scheduling)
         {
             if (!CronExpression.TryParse(scheduling.Interval, CronFormat.Standard, out _))
                 throw new BadRequestException("Interval must be a 5 fields valid cron expression (ex.: \"0 2 * * 1\").");
         }
 
-        public async Task<List<Scheduling>> GetConfigurationSchedulings(int configurationId)
+        public async Task<List<Scheduling>> GetConfigurationSchedules(int configurationId)
         {
             await checkIfConfigurationBelongsToCustomer(configurationId);
             return await _schedulingRepository.GetAllByConfigurationId(configurationId);
         }
 
-
-
-        private int CalculateMaxRunsPerWeek(string cronExpression)
-        {
-            var fields = cronExpression.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-
-            if (fields.Length != 5)
-                throw new ArgumentException("Expressão cron deve ter 5 campos");
-
-            // Campos: 0=minuto, 1=hora, 2=dia do mês, 3=mês, 4=dia da semana
-            string minute = fields[0];
-            string hour = fields[1];
-            string dayOfMonth = fields[2];
-            string dayOfWeek = fields[4];
-
-            // Calcula execuções por dia baseado em minuto e hora
-            int runsPerDay = CalculateRunsPerDay(minute, hour);
-
-            // Calcula quantos dias por semana podem executar
-            int daysPerWeek = CalculateDaysPerWeek(dayOfMonth, dayOfWeek);
-
-            return runsPerDay * daysPerWeek;
-        }
-
-        private int CalculateRunsPerDay(string minute, string hour)
-        {
-            // Cria uma expressão cron apenas com minuto e hora, executando todo dia
-            string dailyCron = $"{minute} {hour} * * *";
-            var cron = CronExpression.Parse(dailyCron);
-            var timeZone = TimeZoneInfo.Utc;
-
-            // Conta execuções em um único dia
-            var startDate = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-            var endDate = startDate.AddDays(1);
-
-            int count = 0;
-            DateTime? nextRun = startDate.AddSeconds(-1);
-
-            while ((nextRun = cron.GetNextOccurrence(nextRun.Value, timeZone, inclusive: false)) != null
-                   && nextRun.Value < endDate)
-            {
-                count++;
-            }
-
-            return count;
-        }
-
-        private int CalculateDaysPerWeek(string dayOfMonth, string dayOfWeek)
-        {
-            bool dayOfMonthIsWildcard = dayOfMonth == "*" || dayOfMonth == "?";
-            bool dayOfWeekIsWildcard = dayOfWeek == "*" || dayOfWeek == "?";
-
-            // Ambos são wildcard = 7 dias por semana
-            if (dayOfMonthIsWildcard && dayOfWeekIsWildcard)
-            {
-                return 7;
-            }
-
-            // Apenas dia da semana é específico
-            if (dayOfMonthIsWildcard && !dayOfWeekIsWildcard)
-            {
-                return CountSpecificValues(dayOfWeek, 0, 6);
-            }
-
-            // Apenas dia do mês é específico
-            if (!dayOfMonthIsWildcard && dayOfWeekIsWildcard)
-            {
-                int specificDays = CountSpecificValues(dayOfMonth, 1, 31);
-                return Math.Min(specificDays, 7);
-            }
-
-            // AMBOS são específicos = UNIÃO (OR) dos dois critérios
-            // No melhor cenário, os dias não se sobrepõem
-            int daysFromDayOfMonth = Math.Min(CountSpecificValues(dayOfMonth, 1, 31), 7);
-            int daysFromDayOfWeek = CountSpecificValues(dayOfWeek, 0, 6);
-
-            // Máximo possível: soma dos dois, limitado a 7
-            return Math.Min(daysFromDayOfMonth + daysFromDayOfWeek, 7);
-        }
-
-        private int CountSpecificValues(string field, int min, int max)
-        {
-            var values = new HashSet<int>();
-
-            // Divide por vírgula para múltiplos valores
-            var parts = field.Split(',');
-
-            foreach (var part in parts)
-            {
-                // Verifica se é um range (ex: 1-5)
-                if (part.Contains('-'))
-                {
-                    var rangeParts = part.Split('-');
-                    int start = int.Parse(rangeParts[0]);
-                    int end = int.Parse(rangeParts[1]);
-
-                    for (int i = start; i <= end; i++)
-                    {
-                        values.Add(i);
-                    }
-                }
-                // Verifica se é um step (ex: */2)
-                else if (part.Contains('/'))
-                {
-                    var stepParts = part.Split('/');
-                    int step = int.Parse(stepParts[1]);
-                    int start = stepParts[0] == "*" ? min : int.Parse(stepParts[0]);
-
-                    for (int i = start; i <= max; i += step)
-                    {
-                        values.Add(i);
-                    }
-                }
-                // Valor único
-                else if (int.TryParse(part, out int value))
-                {
-                    values.Add(value);
-                }
-            }
-
-            return values.Count;
-        }
-
-        public async Task<Scheduling> GetScheduling(int configurationId, int schedulingId)
+        public async Task<Scheduling> GetSchedule(int configurationId, int schedulingId)
         {
             await checkIfConfigurationBelongsToCustomer(configurationId);
             await checkIfSchedulingBelongsToConfiguration(configurationId, schedulingId);
@@ -211,15 +139,24 @@ namespace Mirra_Portal_API.Services
         }
 
 
-        public async Task<Scheduling> UpdateScheduling(int configurationId, int schedulingId, Scheduling scheduling)
+        public async Task<Scheduling> UpdateSchedule(int configurationId, int schedulingId, Scheduling scheduling)
         {
             await checkIfConfigurationBelongsToCustomer(configurationId);
             await checkIfSchedulingBelongsToConfiguration(configurationId, schedulingId);
+            validateIntervalFormat(scheduling);
+
+            var customer = await _customerRepository.GetById(_identityHelper.UserId());
+            var configuration = await _configurationRepository.GetById(configurationId);
+            scheduling.RunsPerWeek = _cronService.CalculateMaxRunsPerWeek(scheduling.Interval);
+
+            configuration.Schedulings.Where(s => s.Id == schedulingId).First().Interval = scheduling.Interval;
+            validateIfIntervalsExceedMaximumAllowedForCustomer(customer, configuration);
+
             scheduling.Id = schedulingId;
             return await _schedulingRepository.Update(scheduling);
         }
 
-        public async Task DeleteScheduling(int configurationId, int schedulingId)
+        public async Task DeleteSchedule(int configurationId, int schedulingId)
         {
             await checkIfConfigurationBelongsToCustomer(configurationId);
             await checkIfSchedulingBelongsToConfiguration(configurationId, schedulingId);

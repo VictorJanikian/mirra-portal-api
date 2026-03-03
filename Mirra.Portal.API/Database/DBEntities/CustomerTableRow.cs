@@ -14,6 +14,10 @@ namespace Mirra_Portal_API.Database.DBEntities
         public int? EmailActivationFailedAttempts { get; set; }
         public SubscriptionPlanTableRow SubscriptionPlan { get; set; }
         public int SubscriptionPlanId { get; set; }
+        public SubscriptionStatusTableRow SubscriptionStatus { get; set; }
+        public int SubscriptionStatusId { get; set; }
+        public string? StripeCustomerId { get; set; }
+        public string? StripeSubscriptionId { get; set; }
         public DateTime? CreatedAt { get; set; }
 
 

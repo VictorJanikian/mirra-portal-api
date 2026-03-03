@@ -10,5 +10,8 @@
         public int? EmailActivationFailedAttempts { get; set; }
         public List<CustomerPlatformConfiguration> PlatformsConfigurations { get; set; }
         public SubscriptionPlan SubscriptionPlan { get; set; }
+        public SubscriptionStatus SubscriptionStatus { get; set; }
+        public string? StripeCustomerId { get; set; }
+        public string? StripeSubscriptionId { get; set; }
     }
 }

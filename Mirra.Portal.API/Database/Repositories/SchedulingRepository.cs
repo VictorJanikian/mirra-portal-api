@@ -34,6 +34,15 @@ namespace Mirra_Portal_API.Database.Repositories
                 .ToListAsync();
         }
 
+        public async Task<List<Scheduling>> GetAllByCustomerId(int customerId)
+        {
+            return await _context.Schedulings
+                .AsNoTracking()
+                .Where(scheduling => scheduling.CustomerPlatformConfiguration.CustomerId == customerId)
+                .ProjectTo<Scheduling>(_mapper.ConfigurationProvider)
+                .ToListAsync();
+        }
+
         public async Task<Scheduling> GetById(int schedulingId)
         {
             return await _context.Schedulings

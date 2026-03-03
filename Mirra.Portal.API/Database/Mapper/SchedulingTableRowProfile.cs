@@ -13,6 +13,13 @@ namespace Mirra_Portal_API.Database.Mapper
                  .ForMember(row => row.ParametersId, options => options.Ignore())
                  .ForMember(row => row.CustomerPlatformConfigurationId, options => options.Ignore())
                  .ForMember(row => row.CreatedAt, options => options.Ignore())
+                 .ForMember(row => row.SchedulingStatus, options => options.Ignore())
+                 .ForMember(row => row.SchedulingStatusId,
+                     options =>
+                     {
+                         options.Condition(entity => entity.SchedulingStatus != null);
+                         options.MapFrom(entity => entity.SchedulingStatus.Id);
+                     })
                  .AfterMap((entity, row) => row.CreatedAt = row.CreatedAt ?? DateTime.Now);
 
             CreateMap<SchedulingTableRow, Scheduling>();

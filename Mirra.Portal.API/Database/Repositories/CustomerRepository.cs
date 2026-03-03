@@ -25,13 +25,35 @@ namespace Mirra_Portal_API.Database.Repositories
 
         public async Task<Customer> GetByEmail(string email)
         {
-
             return await _context.Customers
                 .AsNoTracking()
                 .Where(c => c.Email == email)
                 .ProjectTo<Customer>(_mapper.ConfigurationProvider)
                 .FirstOrDefaultAsync();
+        }
 
+        public async Task<Customer> GetById(int customerId)
+        {
+            var row = await _context.Customers
+                .AsNoTracking()
+                .Where(c => c.Id == customerId)
+                .Include(c => c.SubscriptionPlan)
+                .Include(c => c.SubscriptionStatus)
+                .FirstOrDefaultAsync();
+
+            return _mapper.Map<Customer>(row);
+        }
+
+        public async Task<Customer> GetByStripeCustomerId(string stripeCustomerId)
+        {
+            var row = await _context.Customers
+                .AsNoTracking()
+                .Where(c => c.StripeCustomerId == stripeCustomerId)
+                .Include(c => c.SubscriptionPlan)
+                .Include(c => c.SubscriptionStatus)
+                .FirstOrDefaultAsync();
+
+            return _mapper.Map<Customer>(row);
         }
 
 
