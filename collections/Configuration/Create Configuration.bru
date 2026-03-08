@@ -1,0 +1,43 @@
+meta {
+  name: Create Configuration
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/Configuration
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "platformId": 1,
+    "platformName": "My Blog",
+    "url": "https://example.com",
+    "username": "admin",
+    "password": "password123",
+    "schedulings": [
+      {
+        "interval": "0 9 * * 1",
+        "parameters": {
+          "themeTitle": "Technology",
+          "targetAudience": "Developers",
+          "style": "Informative",
+          "goal": "Educate",
+          "keywords": "tech, programming",
+          "approximatedSize": "1000",
+          "additionalInfo": "",
+          "seoAdditionalInformation": "",
+          "description": "Tech blog post",
+          "searchIntent": "informational",
+          "language": "pt-BR"
+        }
+      }
+    ]
+  }
+}

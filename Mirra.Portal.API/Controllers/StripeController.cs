@@ -27,6 +27,9 @@ namespace Mirra_Portal_API.Controllers
             _logger = logger;
         }
 
+
+
+
         [HttpPost("webhook")]
         public async Task<IActionResult> HandleWebhook()
         {
@@ -90,5 +93,26 @@ namespace Mirra_Portal_API.Controllers
                 return StatusCode(500, new ErrorResponse("Erro interno do servidor: " + e.Message));
             }
         }
+
+        [HttpPost("test")]
+
+        public async Task<IActionResult> TestStripe()
+        {
+
+            var stripeEvent = new Stripe.Event();
+            stripeEvent.Data = new EventData();
+            stripeEvent.Data.Object = new Stripe.Subscription();
+            ((Stripe.Subscription)stripeEvent.Data.Object).CustomerId = "cus_U3fw7e7JZiAtT4";
+            ((Stripe.Subscription)stripeEvent.Data.Object).Items = new StripeList<SubscriptionItem>();
+            ((Stripe.Subscription)stripeEvent.Data.Object).Items.Data = new List<Stripe.SubscriptionItem>();
+            ((Stripe.Subscription)stripeEvent.Data.Object).Items.Data.Add(new Stripe.SubscriptionItem());
+            ((Stripe.Subscription)stripeEvent.Data.Object).Items.Data[0].Price = new Stripe.Price();
+            ((Stripe.Subscription)stripeEvent.Data.Object).Items.Data[0].Price.UnitAmount = 1400;
+            await _stripeWebhookService.HandleSubscriptionUpdated(stripeEvent);
+            return Ok();
+        }
+
+
+
     }
 }

@@ -35,6 +35,7 @@ namespace Mirra_Portal_API.Database.Mapper
 
             CreateMap<CustomerTableRow, Customer>()
                 .ForMember(entity => entity.PlatformsConfigurations, options => options.Ignore());
+
         }
     }
 }

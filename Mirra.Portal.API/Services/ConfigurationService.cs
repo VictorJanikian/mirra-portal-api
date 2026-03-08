@@ -193,5 +193,12 @@ namespace Mirra_Portal_API.Services
                 _identityHelper.UserId(),
                 ESchedulingStatus.SUSPENDED_DUE_TO_LACK_PAYMENT);
         }
+
+        public async Task<bool> HasSuspendedSchedulingsDueToPlanDowngrade()
+        {
+            return await _schedulingRepository.HasAnyByCustomerIdAndStatus(
+                _identityHelper.UserId(),
+                ESchedulingStatus.SUSPENDED_DUE_TO_PLAN_DOWNGRADE);
+        }
     }
 }

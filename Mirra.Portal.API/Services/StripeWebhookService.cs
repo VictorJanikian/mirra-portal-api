@@ -85,7 +85,10 @@ namespace Mirra_Portal_API.Services
 
             int planId = resolvePlanFromInvoice(invoice);
 
-            customer.StripeCustomerId = invoice.Customer.ToString();
+            _logger.LogInformation(
+                "Beginning processing for plan {PlanId}.", planId);
+
+            customer.StripeCustomerId = invoice.CustomerId;
             customer.StripeSubscriptionId = invoice.Parent.SubscriptionDetails.SubscriptionId;
             customer.SubscriptionPlan = new SubscriptionPlan { Id = planId };
             customer.SubscriptionStatus = new SubscriptionStatus { Id = (int)ESubscriptionStatus.ACTIVE };
@@ -101,33 +104,41 @@ namespace Mirra_Portal_API.Services
 
         public async Task HandleSubscriptionUpdated(Event stripeEvent)
         {
-            var subscription = stripeEvent.Data.Object as Subscription;
-            if (subscription == null)
-                throw new BadRequestException("Invalid subscription data.");
-
-            var customer = await _customerRepository.GetByStripeCustomerId(subscription.CustomerId);
-            if (customer == null)
+            try
             {
-                _logger.LogWarning(
-                    "Subscription updated for unknown Stripe customer {StripeCustomerId}.",
-                    subscription.CustomerId);
-                return;
+                var subscription = stripeEvent.Data.Object as Subscription;
+                if (subscription == null)
+                    throw new BadRequestException("Invalid subscription data.");
+
+                var customer = await _customerRepository.GetByStripeCustomerId(subscription.CustomerId);
+                if (customer == null)
+                {
+                    _logger.LogWarning(
+                        "Subscription updated for unknown Stripe customer {StripeCustomerId}.",
+                        subscription.CustomerId);
+                    return;
+                }
+
+                int planId = resolvePlanFromSubscription(subscription);
+
+                customer.StripeSubscriptionId = subscription.Id;
+                customer.SubscriptionPlan = new SubscriptionPlan { Id = planId };
+                customer.SubscriptionStatus = new SubscriptionStatus { Id = (int)ESubscriptionStatus.ACTIVE };
+
+                await _customerRepository.Update(customer);
+
+                await reactivateSchedulingsIfCompliant(customer);
+                await suspendNonCompliantSchedulings(customer, ESchedulingStatus.SUSPENDED_DUE_TO_PLAN_DOWNGRADE);
+
+                _logger.LogInformation(
+                    "Subscription updated for customer {CustomerId}. Plan set to {PlanId}.",
+                    customer.Id, planId);
             }
-
-            int planId = resolvePlanFromSubscription(subscription);
-
-            customer.StripeSubscriptionId = subscription.Id;
-            customer.SubscriptionPlan = new SubscriptionPlan { Id = planId };
-            customer.SubscriptionStatus = new SubscriptionStatus { Id = (int)ESubscriptionStatus.ACTIVE };
-
-            await _customerRepository.Update(customer);
-
-            await reactivateSchedulingsIfCompliant(customer);
-            await suspendNonCompliantSchedulings(customer);
-
-            _logger.LogInformation(
-                "Subscription updated for customer {CustomerId}. Plan set to {PlanId}.",
-                customer.Id, planId);
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                _logger.LogError(ex.StackTrace);
+            }
         }
 
         public async Task HandleSubscriptionDeleted(Event stripeEvent)
@@ -152,7 +163,7 @@ namespace Mirra_Portal_API.Services
 
             await _customerRepository.Update(customer);
 
-            await suspendNonCompliantSchedulings(customer);
+            await suspendNonCompliantSchedulings(customer, ESchedulingStatus.SUSPENDED_DUE_TO_PLAN_DOWNGRADE);
 
             _logger.LogInformation(
                 "Subscription deleted for customer {CustomerId}. Plan set to FREE.",
@@ -203,7 +214,7 @@ namespace Mirra_Portal_API.Services
                 "Could not determine subscription plan from subscription.");
         }
 
-        private async Task suspendNonCompliantSchedulings(Customer customer)
+        private async Task suspendNonCompliantSchedulings(Customer customer, ESchedulingStatus newSchedulingStatus)
         {
             var updatedCustomer = await _customerRepository.GetById(customer.Id);
             var schedulings = await _schedulingRepository.GetAllByCustomerId(customer.Id);
@@ -214,30 +225,35 @@ namespace Mirra_Portal_API.Services
             if (!numberOfPlatformsConnectedAreAllowedInCustomerCurrentPlan)
             {
                 foreach (var scheduling in schedulings)
-                    await suspendScheduling(customer, scheduling);
+                    await suspendScheduling(updatedCustomer, scheduling, newSchedulingStatus);
             }
 
             else
             {
-                foreach (var scheduling in schedulings)
+                foreach (var configuration in configurations)
                 {
-                    var runsPerWeek = _cronService.CalculateMaxRunsPerWeek(scheduling.Interval);
-                    var isAllowed = _subscriptionPlanEvaluator
-                        .checkIfRunsPerWeekAreAllowedInCustomerCurrentPlan(updatedCustomer, runsPerWeek);
+                    var isAllowed = checkIfConfigurationNumberOfPostsAreCompliantToCustomerPlan(updatedCustomer, configuration);
 
                     if (!isAllowed)
-                        await suspendScheduling(customer, scheduling);
-
+                        await suspendSchedulings(updatedCustomer, configuration.Schedulings, newSchedulingStatus);
                 }
             }
-
         }
 
-        private async Task suspendScheduling(Customer customer, Scheduling scheduling)
+        private async Task suspendSchedulings(Customer customer, List<Scheduling> schedulings, ESchedulingStatus newSchedulingStatus)
+        {
+            foreach (var scheduling in schedulings)
+            {
+                if (scheduling.SchedulingStatus?.Id != (int)newSchedulingStatus)
+                    await suspendScheduling(customer, scheduling, newSchedulingStatus);
+            }
+        }
+
+        private async Task suspendScheduling(Customer customer, Scheduling scheduling, ESchedulingStatus newSchedulingStatus)
         {
             scheduling.SchedulingStatus = new SchedulingStatus
             {
-                Id = (int)ESchedulingStatus.SUSPENDED_DUE_TO_LACK_PAYMENT
+                Id = (int)newSchedulingStatus
             };
             await _schedulingRepository.Update(scheduling);
 
@@ -257,19 +273,34 @@ namespace Mirra_Portal_API.Services
             if (numberOfPlatformsConnectedAreAllowedInCustomerCurrentPlan)
             {
 
-                foreach (var scheduling in schedulings)
+                foreach (var configuration in configurations)
                 {
-                    if (scheduling.SchedulingStatus?.Id != (int)ESchedulingStatus.SUSPENDED_DUE_TO_LACK_PAYMENT)
-                        continue;
-
-                    var runsPerWeek = _cronService.CalculateMaxRunsPerWeek(scheduling.Interval);
-                    var isAllowed = _subscriptionPlanEvaluator
-                        .checkIfRunsPerWeekAreAllowedInCustomerCurrentPlan(updatedCustomer, runsPerWeek);
+                    var isAllowed = checkIfConfigurationNumberOfPostsAreCompliantToCustomerPlan(updatedCustomer, configuration);
 
                     if (isAllowed)
-                        await activateScheduling(customer, scheduling);
-
+                        await activateSchedulings(updatedCustomer, configuration.Schedulings);
                 }
+            }
+        }
+
+        private bool checkIfConfigurationNumberOfPostsAreCompliantToCustomerPlan(Customer customer, CustomerPlatformConfiguration configuration)
+        {
+            int totalRunsPerWeek = 0;
+
+            foreach (var schedule in configuration.Schedulings)
+                totalRunsPerWeek += _cronService.CalculateMaxRunsPerWeek(schedule.Interval);
+
+            return _subscriptionPlanEvaluator
+                        .checkIfRunsPerWeekAreAllowedInCustomerCurrentPlan(customer, totalRunsPerWeek);
+
+        }
+
+        private async Task activateSchedulings(Customer customer, List<Scheduling> schedulings)
+        {
+            foreach (var scheduling in schedulings)
+            {
+                if (scheduling.SchedulingStatus?.Id == (int)ESchedulingStatus.SUSPENDED_DUE_TO_LACK_PAYMENT)
+                    await activateScheduling(customer, scheduling);
             }
         }
 

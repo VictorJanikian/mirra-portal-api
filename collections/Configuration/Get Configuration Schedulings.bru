@@ -1,0 +1,19 @@
+meta {
+  name: Get Configuration Schedulings
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/api/Configuration/:configurationId/schedulings
+  body: none
+  auth: bearer
+}
+
+params:path {
+  configurationId: 1
+}
+
+auth:bearer {
+  token: {{token}}
+}

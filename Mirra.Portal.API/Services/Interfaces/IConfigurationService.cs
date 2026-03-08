@@ -12,6 +12,7 @@ namespace Mirra_Portal_API.Services.Interfaces
         public Task<Scheduling> UpdateSchedule(int configurationId, int schedulingId, Scheduling scheduling);
         public Task DeleteSchedule(int configurationId, int schedulingId);
         public Task<bool> HasSuspendedSchedulingsDueToLackOfPayment();
+        public Task<bool> HasSuspendedSchedulingsDueToPlanDowngrade();
 
 
     }

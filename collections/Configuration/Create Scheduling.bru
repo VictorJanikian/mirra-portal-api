@@ -1,0 +1,38 @@
+meta {
+  name: Create Scheduling
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/Configuration/:configurationId/schedulings/
+  body: json
+  auth: bearer
+}
+
+params:path {
+  configurationId: 1
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "interval": "0 9 * * 1",
+    "parameters": {
+      "themeTitle": "Technology",
+      "targetAudience": "Developers",
+      "style": "Informative",
+      "goal": "Educate",
+      "keywords": "tech, programming",
+      "approximatedSize": "1000",
+      "additionalInfo": "",
+      "seoAdditionalInformation": "",
+      "description": "Tech blog post",
+      "searchIntent": "informational",
+      "language": "pt-BR"
+    }
+  }
+}

@@ -23,12 +23,34 @@ namespace Mirra_Portal_API.Controllers
             _mapper = mapper;
         }
 
-        [HttpGet("has-suspended")]
+        [HttpGet("has-suspended-nopayment")]
         public async Task<IActionResult> HasSuspendedSchedulingsDueToLackPayment()
         {
             try
             {
                 var hasInactive = await _configurationService.HasSuspendedSchedulingsDueToLackOfPayment();
+                return Ok(hasInactive);
+            }
+            catch (BadRequestException e)
+            {
+                return BadRequest(new ErrorResponse(e.Message));
+            }
+            catch (NotFoundException e)
+            {
+                return NotFound(new ErrorResponse(e.Message));
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, new ErrorResponse("Erro interno do servidor: " + e.Message));
+            }
+        }
+
+        [HttpGet("has-suspended-downgrade")]
+        public async Task<IActionResult> HasSuspendedSchedulingsDueToPlanDowngrade()
+        {
+            try
+            {
+                var hasInactive = await _configurationService.HasSuspendedSchedulingsDueToPlanDowngrade();
                 return Ok(hasInactive);
             }
             catch (BadRequestException e)

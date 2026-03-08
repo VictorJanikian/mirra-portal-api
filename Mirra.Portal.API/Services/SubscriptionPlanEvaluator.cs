@@ -6,7 +6,12 @@ namespace Mirra_Portal_API.Services
 {
     public class SubscriptionPlanEvaluator : ISubscriptionPlanEvaluator
     {
+        private ILogger<SubscriptionPlanEvaluator> _logger;
 
+        public SubscriptionPlanEvaluator(ILogger<SubscriptionPlanEvaluator> logger)
+        {
+            _logger = logger;
+        }
 
         public bool checkIfRunsPerWeekAreAllowedInCustomerCurrentPlan(Customer customer, int runsPerWeek)
         {
@@ -25,6 +30,7 @@ namespace Mirra_Portal_API.Services
 
         public bool checkIfNumberOfConfigurationsAreAllowedInCustomerCurrentPlan(Customer customer, int numberOfConfigurations)
         {
+
             if (customer.SubscriptionPlan.Id == (int)ESubscriptionPlan.FREE && numberOfConfigurations > 1)
                 return false;
 

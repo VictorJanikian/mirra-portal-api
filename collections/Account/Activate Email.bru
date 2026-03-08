@@ -1,0 +1,18 @@
+meta {
+  name: Activate Email
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/Account/activate
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "email": "john@example.com",
+    "code": "123456"
+  }
+}

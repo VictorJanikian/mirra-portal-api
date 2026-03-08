@@ -1,0 +1,20 @@
+meta {
+  name: Delete Scheduling
+  type: http
+  seq: 7
+}
+
+delete {
+  url: {{baseUrl}}/api/Configuration/:configurationId/schedulings/:schedulingId
+  body: none
+  auth: bearer
+}
+
+params:path {
+  configurationId: 1
+  schedulingId: 1
+}
+
+auth:bearer {
+  token: {{token}}
+}

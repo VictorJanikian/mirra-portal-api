@@ -1,0 +1,18 @@
+meta {
+  name: Login
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/Account/login
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "email": "mirra-ai@outlook.com",
+    "password": "123123"
+  }
+}

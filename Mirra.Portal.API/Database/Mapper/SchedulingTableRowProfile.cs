@@ -10,6 +10,7 @@ namespace Mirra_Portal_API.Database.Mapper
         {
             CreateMap<Scheduling, SchedulingTableRow>()
                  .ForMember(row => row.CustomerPlatformConfiguration, options => options.Ignore())
+                 .ForMember(row => row.Parameters, options => options.Ignore())
                  .ForMember(row => row.ParametersId, options => options.Ignore())
                  .ForMember(row => row.CustomerPlatformConfigurationId, options => options.Ignore())
                  .ForMember(row => row.CreatedAt, options => options.Ignore())

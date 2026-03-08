@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "Mirra Portal API",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}

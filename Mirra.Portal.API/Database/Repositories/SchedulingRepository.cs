@@ -72,16 +72,19 @@ namespace Mirra_Portal_API.Database.Repositories
 
         private void updateRowParametersIfTheyDifferFromIncoming(Scheduling scheduling, SchedulingTableRow row)
         {
-            var savedParameters = _mapper.Map<Parameters>(row.Parameters);
+            var databaseParameters = _mapper.Map<Parameters>(row.Parameters);
 
-            var oldSavedParametersId = savedParameters.Id;
-            savedParameters.Id = 0; // To avoid issues with comparing the IDs
-            if (savedParameters != scheduling.Parameters)
+            var oldSavedParametersId = databaseParameters.Id;
+            databaseParameters.Id = 0; // To avoid issues with comparing the IDs
+            scheduling.Parameters.Id = 0; // To avoid issues with comparing the IDs
+            if (databaseParameters != scheduling.Parameters)
+            {
                 row.Parameters = _mapper.Map<ParametersTableRow>(scheduling.Parameters);
+            }
             else
             {
-                savedParameters.Id = oldSavedParametersId;
-                scheduling.Parameters = savedParameters;
+                databaseParameters.Id = oldSavedParametersId;
+                scheduling.Parameters = databaseParameters;
             }
         }
 
