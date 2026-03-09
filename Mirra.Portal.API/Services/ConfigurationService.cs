@@ -47,6 +47,13 @@ namespace Mirra_Portal_API.Services
 
             configuration.Customer = new Customer { Id = _identityHelper.UserId() };
             configuration.Password = _symmetricEncryptionHelper.Encrypt(configuration.Password);
+
+            foreach (var schedule in configuration.Schedulings)
+            {
+                schedule.RunsPerWeek = _cronService.CalculateMaxRunsPerWeek(schedule.Interval);
+                schedule.SchedulingStatus = new SchedulingStatus { Id = (int)ESchedulingStatus.ACTIVE };
+            }
+
             return await _configurationRepository.Create(configuration);
         }
 
@@ -66,6 +73,7 @@ namespace Mirra_Portal_API.Services
             var customer = await getCustomerByConfigurationId(configurationId);
             await validateIfIntervalExceedMaximumAllowedForCustomer(customer, configurationId, scheduling);
             scheduling.CustomerPlatformConfiguration = new CustomerPlatformConfiguration { Id = configurationId };
+            scheduling.SchedulingStatus = new SchedulingStatus { Id = (int)ESchedulingStatus.ACTIVE };
             return await _schedulingRepository.Create(scheduling);
         }
 

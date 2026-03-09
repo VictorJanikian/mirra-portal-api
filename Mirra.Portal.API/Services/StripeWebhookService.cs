@@ -288,7 +288,7 @@ namespace Mirra_Portal_API.Services
             int totalRunsPerWeek = 0;
 
             foreach (var schedule in configuration.Schedulings)
-                totalRunsPerWeek += _cronService.CalculateMaxRunsPerWeek(schedule.Interval);
+                totalRunsPerWeek += schedule.RunsPerWeek;
 
             return _subscriptionPlanEvaluator
                         .checkIfRunsPerWeekAreAllowedInCustomerCurrentPlan(customer, totalRunsPerWeek);
@@ -299,8 +299,7 @@ namespace Mirra_Portal_API.Services
         {
             foreach (var scheduling in schedulings)
             {
-                if (scheduling.SchedulingStatus?.Id == (int)ESchedulingStatus.SUSPENDED_DUE_TO_LACK_PAYMENT)
-                    await activateScheduling(customer, scheduling);
+                await activateScheduling(customer, scheduling);
             }
         }
 
