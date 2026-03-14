@@ -1,0 +1,20 @@
+meta {
+  name: Get Subscription
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/Customer/subscription
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

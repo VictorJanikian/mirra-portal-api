@@ -13,7 +13,9 @@ namespace Mirra_Portal_API.Mapper
             CreateMap<Customer, RegisterResponse>();
             CreateMap<Customer, LoginResponse>();
             CreateMap<Customer, ActivateEmailResponse>();
-
+            CreateMap<Customer, CustomerResponse>()
+                .ForMember(dest => dest.SubscriptionPlanId, opt => opt.MapFrom(src => src.SubscriptionPlan.Id))
+                .ForMember(dest => dest.SubscriptionStatusId, opt => opt.MapFrom(src => src.SubscriptionStatus.Id));
         }
     }
 }

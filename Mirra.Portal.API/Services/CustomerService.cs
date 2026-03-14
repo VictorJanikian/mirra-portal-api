@@ -58,6 +58,14 @@ namespace Mirra_Portal_API.Services
             return await _customerRepository.Create(newCustomer);
         }
 
+        public async Task<Customer> GetCustomerById(int customerId)
+        {
+            var customer = await _customerRepository.GetById(customerId);
+            if (customer == null)
+                throw new NotFoundException($"Customer with id {customerId} not found.");
+            return customer;
+        }
+
         private async Task sendActivationCodeByEmail(Customer customer)
         {
             if (customer.IsEmailActivated)
