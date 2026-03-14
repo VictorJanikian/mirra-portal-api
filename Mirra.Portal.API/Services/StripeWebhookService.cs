@@ -170,6 +170,35 @@ namespace Mirra_Portal_API.Services
                 customer.Id);
         }
 
+
+        public async Task HandlePaymentFailed(Event stripeEvent)
+        {
+            var invoice = stripeEvent.Data.Object as Invoice;
+            if (invoice == null)
+                throw new BadRequestException("Invalid subscription data.");
+
+            var customer = await _customerRepository.GetByStripeCustomerId(invoice.CustomerId);
+            if (customer == null)
+            {
+                _logger.LogWarning(
+                    "Subscription deleted for unknown Stripe customer {StripeCustomerId}.",
+                    invoice.CustomerId);
+                return;
+            }
+
+            customer.StripeCustomerId = invoice.CustomerId;
+            customer.SubscriptionPlan = new SubscriptionPlan { Id = (int)ESubscriptionPlan.FREE };
+            customer.SubscriptionStatus = new SubscriptionStatus { Id = (int)ESubscriptionStatus.PAYMENT_FAILED };
+
+            await _customerRepository.Update(customer);
+
+            await suspendNonCompliantSchedulings(customer, ESchedulingStatus.SUSPENDED_DUE_TO_LACK_PAYMENT);
+
+            _logger.LogInformation(
+                "Payment failed event processed for customer {CustomerId}. Plan set to FREE.",
+                customer.Id);
+        }
+
         private int resolvePlanFromSession(Session session)
         {
 

@@ -30,6 +30,18 @@ namespace Mirra_Portal_API.Database.Mapper
                         options.Condition(entity => entity.PlatformsConfigurations != null);
                         options.MapFrom(entity => entity.PlatformsConfigurations);
                     })
+                .ForMember(row => row.StripeCustomerId,
+                    options =>
+                    {
+                        options.Condition(entity => entity.StripeCustomerId != null);
+                        options.MapFrom(entity => entity.StripeCustomerId);
+                    })
+                .ForMember(row => row.StripeSubscriptionId,
+                    options =>
+                    {
+                        options.Condition(entity => entity.StripeSubscriptionId != null);
+                        options.MapFrom(entity => entity.StripeSubscriptionId);
+                    })
 
                .AfterMap((entity, row) => row.CreatedAt = row.CreatedAt ?? DateTime.Now);
 

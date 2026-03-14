@@ -8,5 +8,6 @@ namespace Mirra_Portal_API.Services.Interfaces
         Task HandleInvoicePaymentSucceeded(Event stripeEvent);
         Task HandleSubscriptionUpdated(Event stripeEvent);
         Task HandleSubscriptionDeleted(Event stripeEvent);
+        Task HandlePaymentFailed(Event stripeEvent);
     }
 }

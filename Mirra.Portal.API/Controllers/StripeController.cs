@@ -66,6 +66,10 @@ namespace Mirra_Portal_API.Controllers
                         await _stripeWebhookService.HandleSubscriptionDeleted(stripeEvent);
                         break;
 
+                    case EventTypes.InvoicePaymentFailed:
+                        await _stripeWebhookService.HandlePaymentFailed(stripeEvent);
+                        break;
+
                     default:
                         _logger.LogInformation(
                             "Unhandled Stripe event type: {EventType}", stripeEvent.Type);
@@ -94,7 +98,7 @@ namespace Mirra_Portal_API.Controllers
             }
         }
 
-        [HttpPost("test")]
+
 
         public async Task<IActionResult> TestStripe()
         {
