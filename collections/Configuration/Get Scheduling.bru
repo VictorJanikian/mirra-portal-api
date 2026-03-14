@@ -5,7 +5,7 @@ meta {
 }
 
 get {
-  url: {{baseUrl}}/api/Configuration/:configurationId/schedulings/:schedulingId
+  url: {{baseUrl_Mirra}}/api/Configuration/:configurationId/schedulings/:schedulingId
   body: none
   auth: bearer
 }
@@ -16,5 +16,5 @@ params:path {
 }
 
 auth:bearer {
-  token: {{token}}
+  token: {{token_Mirra}}
 }
