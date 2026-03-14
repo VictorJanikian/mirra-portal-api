@@ -9,9 +9,9 @@ using Mirra_Portal_API.Integration;
 using Mirra_Portal_API.Integration.Interfaces;
 using Mirra_Portal_API.Middleware.Identity;
 using Mirra_Portal_API.Middleware.Logging;
+using Mirra_Portal_API.Model;
 using Mirra_Portal_API.Model.Responses;
 using Mirra_Portal_API.Security;
-using Mirra_Portal_API.Model;
 using Mirra_Portal_API.Services;
 using Mirra_Portal_API.Services.Interfaces;
 
@@ -90,10 +90,12 @@ void addServices(IServiceCollection services)
     services.AddScoped<IConfigurationService, ConfigurationService>();
     services.AddScoped<ISubscriptionPlanEvaluator, SubscriptionPlanEvaluator>();
     services.AddScoped<IStripeWebhookService, StripeWebhookService>();
+    services.AddScoped<ISubscriptionService, SubscriptionService>();
     services.AddScoped<IEmailIntegration, EmailIntegration>();
     services.AddScoped<ICustomerPlatformConfigurationRepository, CustomerPlatformConfigurationRepository>();
     services.AddScoped<ICustomerRepository, CustomerRepository>();
     services.AddScoped<ISchedulingRepository, SchedulingRepository>();
+    services.AddScoped<ISubscriptionRepository, SubscriptionRepository>();
     services.AddScoped<IdentityHelper>();
     services.AddScoped<SymmetricEncryptionHelper>();
 }

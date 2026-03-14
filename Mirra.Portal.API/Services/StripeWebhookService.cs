@@ -19,6 +19,7 @@ namespace Mirra_Portal_API.Services
         private readonly ISubscriptionPlanEvaluator _subscriptionPlanEvaluator;
         private readonly StripeSettings _stripeSettings;
         private readonly ILogger<StripeWebhookService> _logger;
+        private readonly ISubscriptionService _subscriptionService;
 
         public StripeWebhookService(
             ICustomerRepository customerRepository,
@@ -27,7 +28,8 @@ namespace Mirra_Portal_API.Services
             ICronService cronService,
             ISubscriptionPlanEvaluator subscriptionPlanEvaluator,
             IOptions<StripeSettings> stripeSettings,
-            ILogger<StripeWebhookService> logger)
+            ILogger<StripeWebhookService> logger,
+            ISubscriptionService subscriptionService)
         {
             _customerRepository = customerRepository;
             _schedulingRepository = schedulingRepository;
@@ -36,6 +38,7 @@ namespace Mirra_Portal_API.Services
             _subscriptionPlanEvaluator = subscriptionPlanEvaluator;
             _stripeSettings = stripeSettings.Value;
             _logger = logger;
+            _subscriptionService = subscriptionService;
         }
 
         public async Task HandleCheckoutSessionCompleted(Event stripeEvent)
@@ -54,7 +57,7 @@ namespace Mirra_Portal_API.Services
             if (customer == null)
                 throw new NotFoundException($"Customer with email {customerEmail} not found.");
 
-            int planId = resolvePlanFromSession(session);
+            int planId = await resolvePlanFromSession(session);
 
             customer.StripeCustomerId = session.CustomerId;
             customer.StripeSubscriptionId = session.SubscriptionId;
@@ -83,7 +86,7 @@ namespace Mirra_Portal_API.Services
                 return;
             }
 
-            int planId = resolvePlanFromInvoice(invoice);
+            int planId = await resolvePlanFromInvoice(invoice);
 
             _logger.LogInformation(
                 "Beginning processing for plan {PlanId}.", planId);
@@ -119,7 +122,7 @@ namespace Mirra_Portal_API.Services
                     return;
                 }
 
-                int planId = resolvePlanFromSubscription(subscription);
+                int planId = await resolvePlanFromSubscription(subscription);
 
                 customer.StripeSubscriptionId = subscription.Id;
                 customer.SubscriptionPlan = new SubscriptionPlan { Id = planId };
@@ -199,42 +202,41 @@ namespace Mirra_Portal_API.Services
                 customer.Id);
         }
 
-        private int resolvePlanFromSession(Session session)
+        private async Task<int> resolvePlanFromSession(Session session)
         {
 
-            if (session.AmountTotal.HasValue
-               && _stripeSettings.PriceToSubscriptionPlan.TryGetValue(session.AmountTotal.Value, out var planId))
+            if (session.AmountTotal.HasValue)
             {
-                return planId;
+                var plan = await _subscriptionService.GetSubscriptionPlanByPrice((int)session.AmountTotal.Value);
+                if (plan != null) return plan.Id;
             }
 
             throw new BadRequestException(
                 "Could not determine subscription plan from checkout session.");
         }
 
-        private int resolvePlanFromInvoice(Invoice invoice)
+        private async Task<int> resolvePlanFromInvoice(Invoice invoice)
         {
-            if (invoice != null
-               && _stripeSettings.PriceToSubscriptionPlan.TryGetValue(invoice.AmountPaid, out var planId))
+            if (invoice != null)
             {
-                return planId;
+                var plan = await _subscriptionService.GetSubscriptionPlanByPrice((int)invoice.AmountPaid);
+                if (plan != null) return plan.Id;
             }
 
             throw new BadRequestException(
                 "Could not determine subscription plan from invoice.");
         }
 
-        private int resolvePlanFromSubscription(Subscription subscription)
+        private async Task<int> resolvePlanFromSubscription(Subscription subscription)
         {
             if (subscription.Items?.Data != null)
             {
                 foreach (var item in subscription.Items.Data)
                 {
-                    if (item.Price != null
-                        && _stripeSettings.PriceToSubscriptionPlan
-                            .TryGetValue(item.Price.UnitAmount.GetValueOrDefault(), out var planId))
+                    if (item.Price != null)
                     {
-                        return planId;
+                        var plan = await _subscriptionService.GetSubscriptionPlanByPrice((int)item.Price.UnitAmount.GetValueOrDefault());
+                        if (plan != null) return plan.Id;
                     }
                 }
             }
