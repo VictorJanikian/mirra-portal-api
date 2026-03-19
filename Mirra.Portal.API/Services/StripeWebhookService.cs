@@ -250,7 +250,7 @@ namespace Mirra_Portal_API.Services
             var updatedCustomer = await _customerRepository.GetById(customer.Id);
             var schedulings = await _schedulingRepository.GetAllByCustomerId(customer.Id);
             var configurations = await _customerPlatformConfigurationRepository.GetAllForCustomer(customer.Id);
-            var numberOfPlatformsConnectedAreAllowedInCustomerCurrentPlan = _subscriptionPlanEvaluator
+            var numberOfPlatformsConnectedAreAllowedInCustomerCurrentPlan = await _subscriptionPlanEvaluator
                     .checkIfNumberOfConfigurationsAreAllowedInCustomerCurrentPlan(updatedCustomer, configurations.Count());
 
             if (!numberOfPlatformsConnectedAreAllowedInCustomerCurrentPlan)
@@ -263,7 +263,7 @@ namespace Mirra_Portal_API.Services
             {
                 foreach (var configuration in configurations)
                 {
-                    var isAllowed = checkIfConfigurationNumberOfPostsAreCompliantToCustomerPlan(updatedCustomer, configuration);
+                    var isAllowed = await checkIfConfigurationNumberOfPostsAreCompliantToCustomerPlan(updatedCustomer, configuration);
 
                     if (!isAllowed)
                         await suspendSchedulings(updatedCustomer, configuration.Schedulings, newSchedulingStatus);
@@ -298,7 +298,7 @@ namespace Mirra_Portal_API.Services
             var updatedCustomer = await _customerRepository.GetById(customer.Id);
             var schedulings = await _schedulingRepository.GetAllByCustomerId(customer.Id);
             var configurations = await _customerPlatformConfigurationRepository.GetAllForCustomer(customer.Id);
-            var numberOfPlatformsConnectedAreAllowedInCustomerCurrentPlan = _subscriptionPlanEvaluator
+            var numberOfPlatformsConnectedAreAllowedInCustomerCurrentPlan = await _subscriptionPlanEvaluator
                     .checkIfNumberOfConfigurationsAreAllowedInCustomerCurrentPlan(updatedCustomer, configurations.Count());
 
             if (numberOfPlatformsConnectedAreAllowedInCustomerCurrentPlan)
@@ -306,7 +306,7 @@ namespace Mirra_Portal_API.Services
 
                 foreach (var configuration in configurations)
                 {
-                    var isAllowed = checkIfConfigurationNumberOfPostsAreCompliantToCustomerPlan(updatedCustomer, configuration);
+                    var isAllowed = await checkIfConfigurationNumberOfPostsAreCompliantToCustomerPlan(updatedCustomer, configuration);
 
                     if (isAllowed)
                         await activateSchedulings(updatedCustomer, configuration.Schedulings);
@@ -314,14 +314,14 @@ namespace Mirra_Portal_API.Services
             }
         }
 
-        private bool checkIfConfigurationNumberOfPostsAreCompliantToCustomerPlan(Customer customer, CustomerPlatformConfiguration configuration)
+        private async Task<bool> checkIfConfigurationNumberOfPostsAreCompliantToCustomerPlan(Customer customer, CustomerPlatformConfiguration configuration)
         {
             int totalRunsPerWeek = 0;
 
             foreach (var schedule in configuration.Schedulings)
                 totalRunsPerWeek += schedule.RunsPerWeek;
 
-            return _subscriptionPlanEvaluator
+            return await _subscriptionPlanEvaluator
                         .checkIfRunsPerWeekAreAllowedInCustomerCurrentPlan(customer, totalRunsPerWeek);
 
         }

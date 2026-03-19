@@ -1,4 +1,4 @@
-﻿using Mirra_Portal_API.Enums;
+using Mirra_Portal_API.Database.Repositories.Interfaces;
 using Mirra_Portal_API.Model;
 using Mirra_Portal_API.Services.Interfaces;
 
@@ -7,40 +7,32 @@ namespace Mirra_Portal_API.Services
     public class SubscriptionPlanEvaluator : ISubscriptionPlanEvaluator
     {
         private ILogger<SubscriptionPlanEvaluator> _logger;
+        private ISubscriptionRepository _subscriptionRepository;
 
-        public SubscriptionPlanEvaluator(ILogger<SubscriptionPlanEvaluator> logger)
+        public SubscriptionPlanEvaluator(ILogger<SubscriptionPlanEvaluator> logger, ISubscriptionRepository subscriptionRepository)
         {
             _logger = logger;
+            _subscriptionRepository = subscriptionRepository;
         }
 
-        public bool checkIfRunsPerWeekAreAllowedInCustomerCurrentPlan(Customer customer, int runsPerWeek)
+        public async Task<bool> checkIfRunsPerWeekAreAllowedInCustomerCurrentPlan(Customer customer, int runsPerWeek)
         {
-            if (customer.SubscriptionPlan.Id == (int)ESubscriptionPlan.FREE && runsPerWeek > 3)
-                return false;
+            var plan = await _subscriptionRepository.GetById(customer.SubscriptionPlan.Id);
 
-            else if (customer.SubscriptionPlan.Id == (int)ESubscriptionPlan.BASIC && runsPerWeek > 5)
-                return false;
+            if (plan == null || plan.MaximumPosts == null)
+                return true;
 
-            else if (customer.SubscriptionPlan.Id == (int)ESubscriptionPlan.PREMIUM && runsPerWeek > 10)
-                return false;
-
-            return true;
-
+            return runsPerWeek <= plan.MaximumPosts;
         }
 
-        public bool checkIfNumberOfConfigurationsAreAllowedInCustomerCurrentPlan(Customer customer, int numberOfConfigurations)
+        public async Task<bool> checkIfNumberOfConfigurationsAreAllowedInCustomerCurrentPlan(Customer customer, int numberOfConfigurations)
         {
+            var plan = await _subscriptionRepository.GetById(customer.SubscriptionPlan.Id);
 
-            if (customer.SubscriptionPlan.Id == (int)ESubscriptionPlan.FREE && numberOfConfigurations > 1)
-                return false;
+            if (plan == null || plan.MaximumConfigurations == null)
+                return true;
 
-            else if (customer.SubscriptionPlan.Id == (int)ESubscriptionPlan.BASIC && numberOfConfigurations > 2)
-                return false;
-
-            else if (customer.SubscriptionPlan.Id == (int)ESubscriptionPlan.PREMIUM && numberOfConfigurations > 5)
-                return false;
-
-            return true;
+            return numberOfConfigurations <= plan.MaximumConfigurations;
         }
     }
 }

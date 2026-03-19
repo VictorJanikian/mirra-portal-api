@@ -42,8 +42,8 @@ namespace Mirra_Portal_API.Services
             var customer = await _customerRepository.GetById(_identityHelper.UserId());
             var customerConfigurations = await _configurationRepository.GetAllForCustomer(_identityHelper.UserId());
 
-            validateIfNumberOfConnectionsExceedsMaximumAllowedForCustomer(customer, customerConfigurations);
-            validateIfIntervalsExceedMaximumAllowedForCustomer(customer, configuration);
+            await validateIfNumberOfConnectionsExceedsMaximumAllowedForCustomer(customer, customerConfigurations);
+            await validateIfIntervalsExceedMaximumAllowedForCustomer(customer, configuration);
 
             configuration.Customer = new Customer { Id = _identityHelper.UserId() };
             configuration.Password = _symmetricEncryptionHelper.Encrypt(configuration.Password);
@@ -57,9 +57,9 @@ namespace Mirra_Portal_API.Services
             return await _configurationRepository.Create(configuration);
         }
 
-        private void validateIfNumberOfConnectionsExceedsMaximumAllowedForCustomer(Customer customer, List<CustomerPlatformConfiguration> customerConfigurations)
+        private async Task validateIfNumberOfConnectionsExceedsMaximumAllowedForCustomer(Customer customer, List<CustomerPlatformConfiguration> customerConfigurations)
         {
-            var numberOfPlatformsConnectedAreAllowedInCustomerCurrentPlan = _subscriptionPlanEvaluator
+            var numberOfPlatformsConnectedAreAllowedInCustomerCurrentPlan = await _subscriptionPlanEvaluator
                             .checkIfNumberOfConfigurationsAreAllowedInCustomerCurrentPlan(customer, customerConfigurations.Count() + 1);
             if (!numberOfPlatformsConnectedAreAllowedInCustomerCurrentPlan)
                 throw new BadRequestException("The number of platforms connected exceeds the limit of your current subscription plan.");
@@ -99,7 +99,7 @@ namespace Mirra_Portal_API.Services
 
             totalRunsPerWeek += _cronService.CalculateMaxRunsPerWeek(newSchedule.Interval);
 
-            var isAllowed = _subscriptionPlanEvaluator
+            var isAllowed = await _subscriptionPlanEvaluator
                 .checkIfRunsPerWeekAreAllowedInCustomerCurrentPlan(customer, totalRunsPerWeek);
 
             if (!isAllowed)
@@ -107,7 +107,7 @@ namespace Mirra_Portal_API.Services
 
         }
 
-        private void validateIfIntervalsExceedMaximumAllowedForCustomer(Customer customer, CustomerPlatformConfiguration configuration)
+        private async Task validateIfIntervalsExceedMaximumAllowedForCustomer(Customer customer, CustomerPlatformConfiguration configuration)
         {
 
             if (configuration.Schedulings == null) return;
@@ -117,7 +117,7 @@ namespace Mirra_Portal_API.Services
             foreach (var schedule in configuration.Schedulings)
                 totalRunsPerWeek += _cronService.CalculateMaxRunsPerWeek(schedule.Interval);
 
-            var isAllowed = _subscriptionPlanEvaluator
+            var isAllowed = await _subscriptionPlanEvaluator
                 .checkIfRunsPerWeekAreAllowedInCustomerCurrentPlan(customer, totalRunsPerWeek);
 
             if (!isAllowed)
@@ -158,7 +158,7 @@ namespace Mirra_Portal_API.Services
             scheduling.RunsPerWeek = _cronService.CalculateMaxRunsPerWeek(scheduling.Interval);
 
             configuration.Schedulings.Where(s => s.Id == schedulingId).First().Interval = scheduling.Interval;
-            validateIfIntervalsExceedMaximumAllowedForCustomer(customer, configuration);
+            await validateIfIntervalsExceedMaximumAllowedForCustomer(customer, configuration);
 
             scheduling.Id = schedulingId;
             return await _schedulingRepository.Update(scheduling);

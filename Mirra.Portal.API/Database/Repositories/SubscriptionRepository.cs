@@ -11,6 +11,20 @@ namespace Mirra_Portal_API.Database.Repositories
         {
         }
 
+        public async Task<SubscriptionPlan> GetById(int id)
+        {
+            var row = await _context.SubscriptionPlans
+                .AsNoTracking()
+                .Where(subscriptionPlan => subscriptionPlan.Id == id)
+                .FirstOrDefaultAsync();
+
+            if (row != null)
+                return _mapper.Map<SubscriptionPlan>(row);
+
+            else
+                return null;
+        }
+
         public async Task<SubscriptionPlan> GetByPrice(int price)
         {
             var row = await _context.SubscriptionPlans
