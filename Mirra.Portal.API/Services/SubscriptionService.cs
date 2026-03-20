@@ -8,10 +8,19 @@ namespace Mirra_Portal_API.Services
     {
 
         private readonly ISubscriptionRepository _subscriptionRepository;
+        private readonly ICustomerRepository _customerRepository;
+        private readonly ICustomerPlatformConfigurationRepository _configurationRepository;
+        private readonly ISubscriptionPlanEvaluator _subscriptionPlanEvaluator;
 
-        public SubscriptionService(ISubscriptionRepository subscriptionRepository)
+        public SubscriptionService(ISubscriptionRepository subscriptionRepository,
+            ISubscriptionPlanEvaluator subscriptionPlanEvaluator,
+            ICustomerRepository customerRepository,
+            ICustomerPlatformConfigurationRepository configurationRepository)
         {
             _subscriptionRepository = subscriptionRepository;
+            _subscriptionPlanEvaluator = subscriptionPlanEvaluator;
+            _configurationRepository = configurationRepository;
+            _customerRepository = customerRepository;
         }
 
         public async Task<SubscriptionPlan> GetSubscriptionPlanByPrice(int price)
@@ -22,6 +31,15 @@ namespace Mirra_Portal_API.Services
         public async Task<List<SubscriptionPlan>> GetAllSubscriptionPlans()
         {
             return await _subscriptionRepository.GetAll();
+        }
+
+        public async Task<int> GetRemainingConfigurationsAllowed(int customerId)
+        {
+            var customer = await _customerRepository.GetById(customerId);
+            var customerConfigurations = await _configurationRepository.GetAllForCustomer(customerId);
+            var reamining = await _subscriptionPlanEvaluator.getRemainingConfigurationsAllowed(customer, customerConfigurations.Count);
+            return reamining ?? -1;
+
         }
     }
 }

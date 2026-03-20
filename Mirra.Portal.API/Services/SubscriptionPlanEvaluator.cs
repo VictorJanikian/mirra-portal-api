@@ -34,5 +34,15 @@ namespace Mirra_Portal_API.Services
 
             return numberOfConfigurations <= plan.MaximumConfigurations;
         }
+
+        public async Task<int?> getRemainingConfigurationsAllowed(Customer customer, int currentNumberOfConfigurations)
+        {
+            var plan = await _subscriptionRepository.GetById(customer.SubscriptionPlan.Id);
+
+            if (plan == null || plan.MaximumConfigurations == null)
+                return null;
+
+            return Math.Max(plan.MaximumConfigurations.Value - currentNumberOfConfigurations, 0);
+        }
     }
 }

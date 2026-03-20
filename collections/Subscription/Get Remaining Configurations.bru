@@ -1,0 +1,20 @@
+meta {
+  name: Get Remaining Configurations
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl_Mirra}}/api/subscription/remaining-configurations
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token_Mirra}}
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
