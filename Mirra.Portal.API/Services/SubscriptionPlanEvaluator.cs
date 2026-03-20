@@ -44,5 +44,15 @@ namespace Mirra_Portal_API.Services
 
             return Math.Max(plan.MaximumConfigurations.Value - currentNumberOfConfigurations, 0);
         }
+
+        public async Task<int?> getRemainingRunsPerWeekAllowed(Customer customer, int configurationId, int currentNumberOfSchedulings)
+        {
+            var plan = await _subscriptionRepository.GetById(customer.SubscriptionPlan.Id);
+
+            if (plan == null || plan.MaximumPosts == null)
+                return null;
+
+            return Math.Max(plan.MaximumPosts.Value - currentNumberOfSchedulings, 0);
+        }
     }
 }

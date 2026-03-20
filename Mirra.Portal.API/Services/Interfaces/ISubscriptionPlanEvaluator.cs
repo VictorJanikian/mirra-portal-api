@@ -9,5 +9,7 @@ namespace Mirra_Portal_API.Services.Interfaces
         public Task<bool> checkIfNumberOfConfigurationsAreAllowedInCustomerCurrentPlan(Customer customer, int numberOfConfigurations);
 
         public Task<int?> getRemainingConfigurationsAllowed(Customer customer, int currentNumberOfConfigurations);
+        public Task<int?> getRemainingRunsPerWeekAllowed(Customer customer, int configurationId, int currentNumberOfSchedulings);
+
     }
 }

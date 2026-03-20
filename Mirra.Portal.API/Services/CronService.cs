@@ -1,4 +1,6 @@
 ﻿using Cronos;
+using Mirra_Portal_API.Exceptions;
+using Mirra_Portal_API.Model;
 using Mirra_Portal_API.Services.Interfaces;
 
 namespace Mirra_Portal_API.Services
@@ -124,6 +126,34 @@ namespace Mirra_Portal_API.Services
             }
 
             return values.Count;
+        }
+
+        public void ValidateIntervalsFormat(CustomerPlatformConfiguration configuration)
+        {
+            if (configuration.Schedulings == null) return;
+
+            foreach (var schedule in configuration.Schedulings)
+            {
+                if (!CronExpression.TryParse(schedule.Interval, CronFormat.Standard, out _))
+                    throw new BadRequestException("Interval must be a 5 fields valid cron expression (ex.: \"0 2 * * 1\").");
+            }
+        }
+
+        public async Task<int> CalculateTotalRunsPerWeekForConfiguration(CustomerPlatformConfiguration configuration)
+        {
+
+            int totalRunsPerWeek = 0;
+
+            foreach (var schedule in configuration.Schedulings)
+                totalRunsPerWeek += CalculateMaxRunsPerWeek(schedule.Interval);
+
+            return totalRunsPerWeek;
+        }
+
+        public void ValidateIntervalFormat(Scheduling scheduling)
+        {
+            if (!CronExpression.TryParse(scheduling.Interval, CronFormat.Standard, out _))
+                throw new BadRequestException("Interval must be a 5 fields valid cron expression (ex.: \"0 2 * * 1\").");
         }
     }
 }

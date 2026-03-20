@@ -1,0 +1,19 @@
+meta {
+  name: Get Configuration
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl_Mirra}}/api/Configuration/:configurationId
+  body: none
+  auth: bearer
+}
+
+params:path {
+  configurationId: 17
+}
+
+auth:bearer {
+  token: {{token_Mirra}}
+}

@@ -1,5 +1,4 @@
-﻿using Cronos;
-using Mirra_Portal_API.Database.Repositories.Interfaces;
+﻿using Mirra_Portal_API.Database.Repositories.Interfaces;
 using Mirra_Portal_API.Enums;
 using Mirra_Portal_API.Exceptions;
 using Mirra_Portal_API.Helper;
@@ -57,14 +56,6 @@ namespace Mirra_Portal_API.Services
             return await _configurationRepository.Create(configuration);
         }
 
-        private async Task validateIfNumberOfConnectionsExceedsMaximumAllowedForCustomer(Customer customer, List<CustomerPlatformConfiguration> customerConfigurations)
-        {
-            var numberOfPlatformsConnectedAreAllowedInCustomerCurrentPlan = await _subscriptionPlanEvaluator
-                            .checkIfNumberOfConfigurationsAreAllowedInCustomerCurrentPlan(customer, customerConfigurations.Count() + 1);
-            if (!numberOfPlatformsConnectedAreAllowedInCustomerCurrentPlan)
-                throw new BadRequestException("The number of platforms connected exceeds the limit of your current subscription plan.");
-        }
-
         public async Task<Scheduling> CreateSchedule(int configurationId, Scheduling scheduling)
         {
             validateIntervalFormat(scheduling);
@@ -77,63 +68,16 @@ namespace Mirra_Portal_API.Services
             return await _schedulingRepository.Create(scheduling);
         }
 
-        private void validateIntervalsFormat(CustomerPlatformConfiguration configuration)
-        {
-            if (configuration.Schedulings == null) return;
-
-            foreach (var schedule in configuration.Schedulings)
-            {
-                if (!CronExpression.TryParse(schedule.Interval, CronFormat.Standard, out _))
-                    throw new BadRequestException("Interval must be a 5 fields valid cron expression (ex.: \"0 2 * * 1\").");
-            }
-        }
-
-        private async Task validateIfIntervalExceedMaximumAllowedForCustomer(Customer customer, int configurationId, Scheduling newSchedule)
-        {
-            var configuration = await _configurationRepository.GetById(configurationId);
-
-            int totalRunsPerWeek = 0;
-
-            foreach (var schedule in configuration.Schedulings)
-                totalRunsPerWeek += _cronService.CalculateMaxRunsPerWeek(schedule.Interval);
-
-            totalRunsPerWeek += _cronService.CalculateMaxRunsPerWeek(newSchedule.Interval);
-
-            var isAllowed = await _subscriptionPlanEvaluator
-                .checkIfRunsPerWeekAreAllowedInCustomerCurrentPlan(customer, totalRunsPerWeek);
-
-            if (!isAllowed)
-                throw new SubscriptionException("Your current plan does not allow the intended number of runs per week.");
-
-        }
-
-        private async Task validateIfIntervalsExceedMaximumAllowedForCustomer(Customer customer, CustomerPlatformConfiguration configuration)
-        {
-
-            if (configuration.Schedulings == null) return;
-
-            int totalRunsPerWeek = 0;
-
-            foreach (var schedule in configuration.Schedulings)
-                totalRunsPerWeek += _cronService.CalculateMaxRunsPerWeek(schedule.Interval);
-
-            var isAllowed = await _subscriptionPlanEvaluator
-                .checkIfRunsPerWeekAreAllowedInCustomerCurrentPlan(customer, totalRunsPerWeek);
-
-            if (!isAllowed)
-                throw new SubscriptionException("Your current plan does not allow the intended number of runs per week.");
-        }
-
-        private void validateIntervalFormat(Scheduling scheduling)
-        {
-            if (!CronExpression.TryParse(scheduling.Interval, CronFormat.Standard, out _))
-                throw new BadRequestException("Interval must be a 5 fields valid cron expression (ex.: \"0 2 * * 1\").");
-        }
-
-        public async Task<List<Scheduling>> GetConfigurationSchedules(int configurationId)
+        public async Task<CustomerPlatformConfiguration> GetConfiguration(int configurationId)
         {
             await checkIfConfigurationBelongsToCustomer(configurationId);
-            return await _schedulingRepository.GetAllByConfigurationId(configurationId);
+
+            var customer = await _customerRepository.GetById(_identityHelper.UserId());
+            var configuration = await _configurationRepository.GetById(configurationId);
+            int totalRunsPerWeek = await calculateTotalRunsPerWeekForConfiguration(configuration);
+            var remainingRunsPerWeek = await _subscriptionPlanEvaluator.getRemainingRunsPerWeekAllowed(customer, configurationId, totalRunsPerWeek);
+            configuration.RemainingRunsPerWeek = remainingRunsPerWeek ?? -1;
+            return configuration;
         }
 
         public async Task<Scheduling> GetSchedule(int configurationId, int schedulingId)
@@ -171,24 +115,6 @@ namespace Mirra_Portal_API.Services
             await _schedulingRepository.Delete(schedulingId);
         }
 
-        private async Task checkIfConfigurationBelongsToCustomer(int configurationId)
-        {
-            var configuration = await _configurationRepository.GetById(configurationId);
-            if (configuration == null || configuration.Customer.Id != _identityHelper.UserId())
-                throw new NotFoundException("Configuration not found.");
-        }
-
-        private async Task checkIfSchedulingBelongsToConfiguration(int configurationId, int schedulingId)
-        {
-            var scheduling = await _schedulingRepository.GetById(schedulingId);
-            if (scheduling == null || scheduling.CustomerPlatformConfiguration.Id != configurationId)
-                throw new NotFoundException("Scheduling not found.");
-        }
-
-        private async Task<Customer> getCustomerByConfigurationId(int configurationId)
-        {
-            return await _customerRepository.GetByConfigurationId(configurationId);
-        }
 
         public async Task<List<CustomerPlatformConfiguration>> GetAllConfigurations()
         {
@@ -208,5 +134,81 @@ namespace Mirra_Portal_API.Services
                 _identityHelper.UserId(),
                 ESchedulingStatus.SUSPENDED_DUE_TO_PLAN_DOWNGRADE);
         }
+
+        /*---*/
+
+        private void validateIntervalsFormat(CustomerPlatformConfiguration configuration)
+        {
+            _cronService.ValidateIntervalsFormat(configuration);
+        }
+
+        private void validateIntervalFormat(Scheduling scheduling)
+        {
+            _cronService.ValidateIntervalFormat(scheduling);
+        }
+
+        private async Task validateIfIntervalsExceedMaximumAllowedForCustomer(Customer customer, CustomerPlatformConfiguration configuration)
+        {
+
+            if (configuration.Schedulings == null) return;
+
+            int totalRunsPerWeek = await calculateTotalRunsPerWeekForConfiguration(configuration);
+
+            var isAllowed = await _subscriptionPlanEvaluator
+                .checkIfRunsPerWeekAreAllowedInCustomerCurrentPlan(customer, totalRunsPerWeek);
+
+            if (!isAllowed)
+                throw new SubscriptionException("Your current plan does not allow the intended number of runs per week.");
+        }
+
+        private async Task validateIfIntervalExceedMaximumAllowedForCustomer(Customer customer, int configurationId, Scheduling newSchedule)
+        {
+            var configuration = await _configurationRepository.GetById(configurationId);
+            int totalRunsPerWeek = await calculateTotalRunsPerWeekForConfiguration(configuration);
+
+            totalRunsPerWeek += _cronService.CalculateMaxRunsPerWeek(newSchedule.Interval);
+
+            var isAllowed = await _subscriptionPlanEvaluator
+                .checkIfRunsPerWeekAreAllowedInCustomerCurrentPlan(customer, totalRunsPerWeek);
+
+            if (!isAllowed)
+                throw new SubscriptionException("Your current plan does not allow the intended number of runs per week.");
+
+        }
+
+        private async Task<int> calculateTotalRunsPerWeekForConfiguration(CustomerPlatformConfiguration configuration)
+        {
+            return await _cronService.CalculateTotalRunsPerWeekForConfiguration(configuration);
+        }
+
+
+        private async Task validateIfNumberOfConnectionsExceedsMaximumAllowedForCustomer(Customer customer, List<CustomerPlatformConfiguration> customerConfigurations)
+        {
+            var numberOfPlatformsConnectedAreAllowedInCustomerCurrentPlan = await _subscriptionPlanEvaluator
+                            .checkIfNumberOfConfigurationsAreAllowedInCustomerCurrentPlan(customer, customerConfigurations.Count() + 1);
+            if (!numberOfPlatformsConnectedAreAllowedInCustomerCurrentPlan)
+                throw new BadRequestException("The number of platforms connected exceeds the limit of your current subscription plan.");
+        }
+
+
+        private async Task checkIfConfigurationBelongsToCustomer(int configurationId)
+        {
+            var configuration = await _configurationRepository.GetById(configurationId);
+            if (configuration == null || configuration.Customer.Id != _identityHelper.UserId())
+                throw new NotFoundException("Configuration not found.");
+        }
+
+        private async Task checkIfSchedulingBelongsToConfiguration(int configurationId, int schedulingId)
+        {
+            var scheduling = await _schedulingRepository.GetById(schedulingId);
+            if (scheduling == null || scheduling.CustomerPlatformConfiguration.Id != configurationId)
+                throw new NotFoundException("Scheduling not found.");
+        }
+
+        private async Task<Customer> getCustomerByConfigurationId(int configurationId)
+        {
+            return await _customerRepository.GetByConfigurationId(configurationId);
+        }
+
     }
 }

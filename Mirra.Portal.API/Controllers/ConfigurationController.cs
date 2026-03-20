@@ -68,13 +68,13 @@ namespace Mirra_Portal_API.Controllers
             }
         }
 
-        [HttpGet("{configurationId}/schedulings")]
-        public async Task<IActionResult> RecoverConfigurationSchedulings([FromRoute] int configurationId)
+        [HttpGet("{configurationId}")]
+        public async Task<IActionResult> RecoverConfiguration([FromRoute] int configurationId)
         {
             try
             {
-                var schedulings = await _configurationService.GetConfigurationSchedules(configurationId);
-                return Ok(_mapper.Map<List<SchedulingResponse>>(schedulings));
+                var configuration = await _configurationService.GetConfiguration(configurationId);
+                return Ok(_mapper.Map<ConfigurationResponse>(configuration));
             }
             catch (BadRequestException e)
             {
