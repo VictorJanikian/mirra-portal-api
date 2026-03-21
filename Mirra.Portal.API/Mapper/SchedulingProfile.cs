@@ -10,7 +10,8 @@ namespace Mirra_Portal_API.Mapper
         public SchedulingProfile()
         {
             CreateMap<SchedulingRequest, Scheduling>();
-            CreateMap<Scheduling, SchedulingResponse>();
+            CreateMap<Scheduling, SchedulingResponse>()
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.SchedulingStatus != null ? src.SchedulingStatus.Id : (int?)null));
         }
     }
 }
