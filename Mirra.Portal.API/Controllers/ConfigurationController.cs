@@ -16,12 +16,16 @@ namespace Mirra_Portal_API.Controllers
     public class ConfigurationController : ControllerBase
     {
         IConfigurationService _configurationService;
+        IScheduleService _scheduleService;
         IMapper _mapper;
+
         public ConfigurationController(IConfigurationService configurationService,
-                                       IMapper mapper)
+                                       IMapper mapper,
+                                       IScheduleService scheduleService)
         {
             _configurationService = configurationService;
             _mapper = mapper;
+            _scheduleService = scheduleService;
         }
 
         [HttpPost("{configurationId}/schedulings/")]
@@ -30,7 +34,7 @@ namespace Mirra_Portal_API.Controllers
             try
             {
                 var scheduling = _mapper.Map<Scheduling>(request);
-                return Ok(_mapper.Map<SchedulingResponse>(await _configurationService.CreateSchedule(configurationId, scheduling)));
+                return Ok(_mapper.Map<SchedulingResponse>(await _scheduleService.CreateSchedule(configurationId, scheduling)));
             }
             catch (BadRequestException e)
             {
@@ -74,7 +78,8 @@ namespace Mirra_Portal_API.Controllers
             try
             {
                 var configuration = await _configurationService.GetConfiguration(configurationId);
-                return Ok(_mapper.Map<ConfigurationResponse>(configuration));
+                return Ok(_mapper.Map<ConfigurationResponse
+                    >(configuration));
             }
             catch (BadRequestException e)
             {
@@ -118,7 +123,7 @@ namespace Mirra_Portal_API.Controllers
         {
             try
             {
-                var scheduling = await _configurationService.GetSchedule(configurationId, schedulingId);
+                var scheduling = await _scheduleService.GetSchedule(configurationId, schedulingId);
                 return Ok(_mapper.Map<SchedulingResponse>(scheduling));
             }
             catch (BadRequestException e)
@@ -141,7 +146,7 @@ namespace Mirra_Portal_API.Controllers
             try
             {
                 var scheduling = _mapper.Map<Scheduling>(schedulingRequest);
-                var updatedScheduling = await _configurationService.UpdateSchedule(configurationId, schedulingId, scheduling);
+                var updatedScheduling = await _scheduleService.UpdateSchedule(configurationId, schedulingId, scheduling);
                 return Ok(_mapper.Map<SchedulingResponse>(updatedScheduling));
             }
             catch (BadRequestException e)
@@ -165,7 +170,7 @@ namespace Mirra_Portal_API.Controllers
         {
             try
             {
-                await _configurationService.DeleteSchedule(configurationId, schedulingId);
+                await _scheduleService.DeleteSchedule(configurationId, schedulingId);
                 return Ok();
             }
             catch (BadRequestException e)

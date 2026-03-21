@@ -56,17 +56,6 @@ namespace Mirra_Portal_API.Services
             return await _configurationRepository.Create(configuration);
         }
 
-        public async Task<Scheduling> CreateSchedule(int configurationId, Scheduling scheduling)
-        {
-            validateIntervalFormat(scheduling);
-            await checkIfConfigurationBelongsToCustomer(configurationId);
-            scheduling.RunsPerWeek = _cronService.CalculateMaxRunsPerWeek(scheduling.Interval);
-            var customer = await getCustomerByConfigurationId(configurationId);
-            await validateIfIntervalExceedMaximumAllowedForCustomer(customer, configurationId, scheduling);
-            scheduling.CustomerPlatformConfiguration = new CustomerPlatformConfiguration { Id = configurationId };
-            scheduling.SchedulingStatus = new SchedulingStatus { Id = (int)ESchedulingStatus.ACTIVE };
-            return await _schedulingRepository.Create(scheduling);
-        }
 
         public async Task<CustomerPlatformConfiguration> GetConfiguration(int configurationId)
         {
@@ -80,40 +69,7 @@ namespace Mirra_Portal_API.Services
             return configuration;
         }
 
-        public async Task<Scheduling> GetSchedule(int configurationId, int schedulingId)
-        {
-            await checkIfConfigurationBelongsToCustomer(configurationId);
-            await checkIfSchedulingBelongsToConfiguration(configurationId, schedulingId);
-            var scheduling = await _schedulingRepository.GetById(schedulingId);
-            if (scheduling == null || scheduling.CustomerPlatformConfiguration.Id != configurationId)
-                throw new BadRequestException("Scheduling not found.");
-            return scheduling;
-        }
 
-
-        public async Task<Scheduling> UpdateSchedule(int configurationId, int schedulingId, Scheduling scheduling)
-        {
-            await checkIfConfigurationBelongsToCustomer(configurationId);
-            await checkIfSchedulingBelongsToConfiguration(configurationId, schedulingId);
-            validateIntervalFormat(scheduling);
-
-            var customer = await _customerRepository.GetById(_identityHelper.UserId());
-            var configuration = await _configurationRepository.GetById(configurationId);
-            scheduling.RunsPerWeek = _cronService.CalculateMaxRunsPerWeek(scheduling.Interval);
-
-            configuration.Schedulings.Where(s => s.Id == schedulingId).First().Interval = scheduling.Interval;
-            await validateIfIntervalsExceedMaximumAllowedForCustomer(customer, configuration);
-
-            scheduling.Id = schedulingId;
-            return await _schedulingRepository.Update(scheduling);
-        }
-
-        public async Task DeleteSchedule(int configurationId, int schedulingId)
-        {
-            await checkIfConfigurationBelongsToCustomer(configurationId);
-            await checkIfSchedulingBelongsToConfiguration(configurationId, schedulingId);
-            await _schedulingRepository.Delete(schedulingId);
-        }
 
 
         public async Task<List<CustomerPlatformConfiguration>> GetAllConfigurations()
@@ -152,10 +108,7 @@ namespace Mirra_Portal_API.Services
             _cronService.ValidateIntervalsFormat(configuration);
         }
 
-        private void validateIntervalFormat(Scheduling scheduling)
-        {
-            _cronService.ValidateIntervalFormat(scheduling);
-        }
+
 
         private async Task validateIfIntervalsExceedMaximumAllowedForCustomer(Customer customer, CustomerPlatformConfiguration configuration)
         {
@@ -171,20 +124,6 @@ namespace Mirra_Portal_API.Services
                 throw new SubscriptionException("Your current plan does not allow the intended number of runs per week.");
         }
 
-        private async Task validateIfIntervalExceedMaximumAllowedForCustomer(Customer customer, int configurationId, Scheduling newSchedule)
-        {
-            var configuration = await _configurationRepository.GetById(configurationId);
-            int totalRunsPerWeek = await calculateTotalRunsPerWeekForConfiguration(configuration);
-
-            totalRunsPerWeek += _cronService.CalculateMaxRunsPerWeek(newSchedule.Interval);
-
-            var isAllowed = await _subscriptionPlanEvaluator
-                .checkIfRunsPerWeekAreAllowedInCustomerCurrentPlan(customer, totalRunsPerWeek);
-
-            if (!isAllowed)
-                throw new SubscriptionException("Your current plan does not allow the intended number of runs per week.");
-
-        }
 
         private async Task<int> calculateTotalRunsPerWeekForConfiguration(CustomerPlatformConfiguration configuration)
         {
@@ -208,17 +147,7 @@ namespace Mirra_Portal_API.Services
                 throw new NotFoundException("Configuration not found.");
         }
 
-        private async Task checkIfSchedulingBelongsToConfiguration(int configurationId, int schedulingId)
-        {
-            var scheduling = await _schedulingRepository.GetById(schedulingId);
-            if (scheduling == null || scheduling.CustomerPlatformConfiguration.Id != configurationId)
-                throw new NotFoundException("Scheduling not found.");
-        }
 
-        private async Task<Customer> getCustomerByConfigurationId(int configurationId)
-        {
-            return await _customerRepository.GetByConfigurationId(configurationId);
-        }
 
     }
 }

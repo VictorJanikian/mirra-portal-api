@@ -90,6 +90,7 @@ void addServices(IServiceCollection services)
     services.AddScoped<IConfigurationService, ConfigurationService>();
     services.AddScoped<ISubscriptionPlanEvaluator, SubscriptionPlanEvaluator>();
     services.AddScoped<IStripeWebhookService, StripeWebhookService>();
+    services.AddScoped<IScheduleService, ScheduleService>();
     services.AddScoped<ISubscriptionService, SubscriptionService>();
     services.AddScoped<IEmailIntegration, EmailIntegration>();
     services.AddScoped<ICustomerPlatformConfigurationRepository, CustomerPlatformConfigurationRepository>();
