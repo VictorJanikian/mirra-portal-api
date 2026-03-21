@@ -118,7 +118,17 @@ namespace Mirra_Portal_API.Services
 
         public async Task<List<CustomerPlatformConfiguration>> GetAllConfigurations()
         {
-            return await _configurationRepository.GetAllForCustomer(_identityHelper.UserId());
+            var customer = await _customerRepository.GetById(_identityHelper.UserId());
+            var configurations = await _configurationRepository.GetAllForCustomer(_identityHelper.UserId());
+
+            foreach (var configuration in configurations)
+            {
+                var totalRunsPerWeek = await calculateTotalRunsPerWeekForConfiguration(configuration);
+                var remainingRunsPerWeek = await _subscriptionPlanEvaluator.getRemainingRunsPerWeekAllowed(customer, configuration.Id, totalRunsPerWeek);
+                configuration.RemainingRunsPerWeek = remainingRunsPerWeek ?? -1;
+            }
+
+            return configurations;
         }
 
         public async Task<bool> HasSuspendedSchedulingsDueToLackOfPayment()
