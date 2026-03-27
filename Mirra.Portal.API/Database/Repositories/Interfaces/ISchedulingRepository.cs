@@ -12,5 +12,6 @@ namespace Mirra_Portal_API.Database.Repositories.Interfaces
         Task<Scheduling> Update(Scheduling scheduling);
         Task Delete(int schedulingId);
         Task<bool> HasAnyByCustomerIdAndStatus(int customerId, ESchedulingStatus status);
+        Task<bool> HasAnyByConfigurationIdAndStatus(int customerId, ESchedulingStatus status);
     }
 }

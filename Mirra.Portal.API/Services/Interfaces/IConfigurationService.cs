@@ -9,6 +9,8 @@ namespace Mirra_Portal_API.Services.Interfaces
         public Task<List<CustomerPlatformConfiguration>> GetAllConfigurations();
         public Task<bool> HasSuspendedSchedulingsDueToLackOfPayment();
         public Task<bool> HasSuspendedSchedulingsDueToPlanDowngrade();
+        public Task<bool> HasSuspendedSchedulingsDueToLackOfPayment(int configurationId);
+        public Task<bool> HasSuspendedSchedulingsDueToPlanDowngrade(int configurationId);
 
 
     }

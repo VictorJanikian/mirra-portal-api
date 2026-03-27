@@ -101,6 +101,26 @@ namespace Mirra_Portal_API.Services
                 ESchedulingStatus.SUSPENDED_DUE_TO_PLAN_DOWNGRADE);
         }
 
+
+        public async Task<bool> HasSuspendedSchedulingsDueToLackOfPayment(int configurationId)
+        {
+            await checkIfConfigurationBelongsToCustomer(configurationId);
+
+            return await _schedulingRepository.HasAnyByConfigurationIdAndStatus(
+                            configurationId,
+                            ESchedulingStatus.SUSPENDED_DUE_TO_LACK_PAYMENT);
+
+        }
+
+        public async Task<bool> HasSuspendedSchedulingsDueToPlanDowngrade(int configurationId)
+        {
+            await checkIfConfigurationBelongsToCustomer(configurationId);
+
+            return await _schedulingRepository.HasAnyByConfigurationIdAndStatus(
+                        configurationId,
+                        ESchedulingStatus.SUSPENDED_DUE_TO_PLAN_DOWNGRADE);
+        }
+
         /*---*/
 
         private void validateIntervalsFormat(CustomerPlatformConfiguration configuration)
@@ -146,8 +166,6 @@ namespace Mirra_Portal_API.Services
             if (configuration == null || configuration.Customer.Id != _identityHelper.UserId())
                 throw new NotFoundException("Configuration not found.");
         }
-
-
 
     }
 }

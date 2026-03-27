@@ -1,0 +1,24 @@
+meta {
+  name: Has Suspended No Payment
+  type: http
+  seq: 8
+}
+
+get {
+  url: {{baseUrl_Mirra}}/api/configuration/:configurationId/has-suspended-nopayment
+  body: none
+  auth: bearer
+}
+
+params:path {
+  configurationId: 23
+}
+
+auth:bearer {
+  token: {{token_Mirra}}
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

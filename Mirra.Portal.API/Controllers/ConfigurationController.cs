@@ -186,5 +186,50 @@ namespace Mirra_Portal_API.Controllers
                 return StatusCode(500, new ErrorResponse("Erro interno do servidor: " + e.Message));
             }
         }
+
+
+        [HttpGet("{configurationId}/has-suspended-nopayment")]
+        public async Task<IActionResult> HasSuspendedSchedulingsDueToLackPaymentAtThisConfiguration([FromRoute] int configurationId)
+        {
+            try
+            {
+                var hasInactive = await _configurationService.HasSuspendedSchedulingsDueToLackOfPayment(configurationId);
+                return Ok(hasInactive);
+            }
+            catch (BadRequestException e)
+            {
+                return BadRequest(new ErrorResponse(e.Message));
+            }
+            catch (NotFoundException e)
+            {
+                return NotFound(new ErrorResponse(e.Message));
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, new ErrorResponse("Erro interno do servidor: " + e.Message));
+            }
+        }
+
+        [HttpGet("{configurationId}/has-suspended-downgrade")]
+        public async Task<IActionResult> HasSuspendedSchedulingsDueToPlanDowngradeAtThisConfiguration([FromRoute] int configurationId)
+        {
+            try
+            {
+                var hasInactive = await _configurationService.HasSuspendedSchedulingsDueToPlanDowngrade(configurationId);
+                return Ok(hasInactive);
+            }
+            catch (BadRequestException e)
+            {
+                return BadRequest(new ErrorResponse(e.Message));
+            }
+            catch (NotFoundException e)
+            {
+                return NotFound(new ErrorResponse(e.Message));
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, new ErrorResponse("Erro interno do servidor: " + e.Message));
+            }
+        }
     }
 }

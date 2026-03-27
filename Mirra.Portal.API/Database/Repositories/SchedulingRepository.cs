@@ -102,5 +102,13 @@ namespace Mirra_Portal_API.Database.Repositories
                 .AnyAsync(scheduling => scheduling.CustomerPlatformConfiguration.CustomerId == customerId
                     && scheduling.SchedulingStatus.Id == (int)status);
         }
+
+        public async Task<bool> HasAnyByConfigurationIdAndStatus(int configurationId, ESchedulingStatus status)
+        {
+            return await _context.Schedulings
+                .AsNoTracking()
+                .AnyAsync(scheduling => scheduling.CustomerPlatformConfiguration.Id == configurationId
+                    && scheduling.SchedulingStatus.Id == (int)status);
+        }
     }
 }
