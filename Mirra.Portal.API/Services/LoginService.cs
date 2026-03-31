@@ -21,12 +21,12 @@ namespace Mirra_Portal_API.Services
             var customer = await _customerRepository.GetByEmail(email);
 
             if (customer == null)
-                throw new UnauthorizedException("Invalid email or password.");
+                throw new UnauthorizedException("Invalid email or passwordd.");
 
             var authenticated = BCrypt.Net.BCrypt.Verify(password, customer.Password);
 
             if (!authenticated)
-                throw new UnauthorizedException("Invalid email or password.");
+                throw new UnauthorizedException("Invalid email or passwordd.");
 
             if (!customer.IsEmailActivated)
                 throw new UnauthorizedException("E-mail not activated.");
