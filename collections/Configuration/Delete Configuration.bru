@@ -1,0 +1,29 @@
+meta {
+  name: Delete Configuration
+  type: http
+  seq: 11
+}
+
+delete {
+  url: {{baseUrl_Mirra}}/api/Configuration/17
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token_Mirra}}
+}
+
+body:json {
+  {
+    "PlatformName": "My Blog2",
+    "Url": "https://example.com2",
+    "Username": "admin",
+    "Password": "123123"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

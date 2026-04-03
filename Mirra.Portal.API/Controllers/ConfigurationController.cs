@@ -188,6 +188,51 @@ namespace Mirra_Portal_API.Controllers
         }
 
 
+        [HttpDelete("{configurationId}")]
+        public async Task<IActionResult> DeleteConfiguration([FromRoute] int configurationId)
+        {
+            try
+            {
+                await _configurationService.DeleteConfiguration(configurationId);
+                return Ok();
+            }
+            catch (BadRequestException e)
+            {
+                return BadRequest(new ErrorResponse(e.Message));
+            }
+            catch (NotFoundException e)
+            {
+                return NotFound(new ErrorResponse(e.Message));
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, new ErrorResponse("Erro interno do servidor: " + e.Message));
+            }
+        }
+
+        [HttpPut("{configurationId}")]
+        public async Task<IActionResult> EditConfiguration([FromRoute] int configurationId, [FromBody] EditConfigurationRequest request)
+        {
+            try
+            {
+                var configuration = _mapper.Map<CustomerPlatformConfiguration>(request);
+                var updated = await _configurationService.UpdateConfiguration(configurationId, configuration);
+                return Ok(_mapper.Map<ConfigurationResponse>(updated));
+            }
+            catch (BadRequestException e)
+            {
+                return BadRequest(new ErrorResponse(e.Message));
+            }
+            catch (NotFoundException e)
+            {
+                return NotFound(new ErrorResponse(e.Message));
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, new ErrorResponse("Erro interno do servidor: " + e.Message));
+            }
+        }
+
         [HttpGet("{configurationId}/has-suspended-nopayment")]
         public async Task<IActionResult> HasSuspendedSchedulingsDueToLackPaymentAtThisConfiguration([FromRoute] int configurationId)
         {

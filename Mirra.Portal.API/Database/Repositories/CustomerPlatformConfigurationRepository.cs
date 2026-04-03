@@ -41,8 +41,35 @@ namespace Mirra_Portal_API.Database.Repositories
                 .Where(configuration => configuration.Id == id)
                 .ProjectTo<CustomerPlatformConfiguration>(_mapper.ConfigurationProvider)
                 .FirstOrDefaultAsync();
+        }
 
+        public async Task Delete(int id)
+        {
+            await _context.Schedulings
+                .Where(s => s.CustomerPlatformConfigurationId == id)
+                .ExecuteDeleteAsync();
 
+            await _context.CustomerPlatformsConfiguration
+                .Where(c => c.Id == id)
+                .ExecuteDeleteAsync();
+        }
+
+        public async Task<CustomerPlatformConfiguration> Update(CustomerPlatformConfiguration configuration)
+        {
+            var row = await _context.CustomerPlatformsConfiguration
+                .Where(c => c.Id == configuration.Id)
+                .FirstOrDefaultAsync();
+
+            if (row == null) return null;
+
+            row.PlatformName = configuration.PlatformName;
+            row.Url = configuration.Url;
+            row.Username = configuration.Username;
+            row.Password = configuration.Password;
+
+            await _context.SaveChangesAsync();
+
+            return configuration;
         }
     }
 }

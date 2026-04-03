@@ -53,6 +53,8 @@ namespace Mirra_Portal_API.Services
                 schedule.SchedulingStatus = new SchedulingStatus { Id = (int)ESchedulingStatus.ACTIVE };
             }
 
+            configuration.Url = configuration.Url.TrimEnd('/') + "/wp-json";
+
             return await _configurationRepository.Create(configuration);
         }
 
@@ -119,6 +121,22 @@ namespace Mirra_Portal_API.Services
             return await _schedulingRepository.HasAnyByConfigurationIdAndStatus(
                         configurationId,
                         ESchedulingStatus.SUSPENDED_DUE_TO_PLAN_DOWNGRADE);
+        }
+
+        public async Task DeleteConfiguration(int configurationId)
+        {
+            await checkIfConfigurationBelongsToCustomer(configurationId);
+            await _configurationRepository.Delete(configurationId);
+        }
+
+        public async Task<CustomerPlatformConfiguration> UpdateConfiguration(int configurationId, CustomerPlatformConfiguration configuration)
+        {
+            await checkIfConfigurationBelongsToCustomer(configurationId);
+
+            configuration.Id = configurationId;
+            configuration.Password = _symmetricEncryptionHelper.Encrypt(configuration.Password);
+
+            return await _configurationRepository.Update(configuration);
         }
 
         /*---*/

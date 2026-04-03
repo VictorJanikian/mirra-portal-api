@@ -8,5 +8,7 @@ namespace Mirra_Portal_API.Database.Repositories.Interfaces
 
         public Task<CustomerPlatformConfiguration> GetById(int id);
         public Task<List<CustomerPlatformConfiguration>> GetAllForCustomer(int customerId);
+        Task Delete(int id);
+        Task<CustomerPlatformConfiguration> Update(CustomerPlatformConfiguration configuration);
     }
 }
