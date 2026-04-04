@@ -58,6 +58,11 @@ namespace Mirra_Portal_API.Database.Repositories
         {
             var row = await _context.CustomerPlatformsConfiguration
                 .Where(c => c.Id == configuration.Id)
+                .Include(c => c.Schedulings)
+                .ThenInclude(s => s.Parameters)
+                .Include(c => c.Schedulings)
+                .ThenInclude(s => s.SchedulingStatus)
+                .Include(c => c.Platform)
                 .FirstOrDefaultAsync();
 
             if (row == null) return null;
@@ -69,7 +74,7 @@ namespace Mirra_Portal_API.Database.Repositories
 
             await _context.SaveChangesAsync();
 
-            return configuration;
+            return _mapper.Map<CustomerPlatformConfiguration>(row);
         }
     }
 }
