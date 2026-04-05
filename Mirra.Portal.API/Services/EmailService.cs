@@ -81,5 +81,20 @@ namespace Mirra_Portal_API.Services
             await _customerRepository.Update(customer);
         }
 
+        public async Task SendPasswordResetCode(string recipientEmail, string code)
+        {
+            var subject = code + " is your Mirra AI password reset code";
+            var body = $@"<html><body style='font-family:sans-serif;'>
+                <h2>Password Reset - Mirra AI</h2>
+                <p>Your password reset code is:</p>
+                <div style='font-size:2em; font-weight:bold; margin:20px 0; color:#4F46E5;'>{code}</div>
+                <p>This code expires in 15 minutes. If you did not request a password reset, please ignore this email.</p>
+                <br/>
+                <p style='color:#888;'>Mirra AI Team</p>
+                </body></html>";
+            var sender = _configuration["Email:From"];
+            await _emailIntegration.SendEmail(sender, recipientEmail, subject, body);
+        }
+
     }
 }

@@ -13,5 +13,8 @@
         public SubscriptionStatus SubscriptionStatus { get; set; }
         public string? StripeCustomerId { get; set; }
         public string? StripeSubscriptionId { get; set; }
+        public string? PasswordResetCode { get; set; }
+        public DateTime? PasswordResetCodeExpiration { get; set; }
+        public int? PasswordResetFailedAttempts { get; set; }
     }
 }

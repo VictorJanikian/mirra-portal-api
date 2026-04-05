@@ -18,6 +18,9 @@ namespace Mirra_Portal_API.Database.DBEntities
         public int SubscriptionStatusId { get; set; }
         public string? StripeCustomerId { get; set; }
         public string? StripeSubscriptionId { get; set; }
+        public string? PasswordResetCode { get; set; }
+        public DateTime? PasswordResetCodeExpiration { get; set; }
+        public int? PasswordResetFailedAttempts { get; set; }
         public DateTime? CreatedAt { get; set; }
 
 

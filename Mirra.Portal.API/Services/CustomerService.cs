@@ -66,6 +66,52 @@ namespace Mirra_Portal_API.Services
             return customer;
         }
 
+        public async Task ForgotPassword(string email)
+        {
+            var customer = await _customerRepository.GetByEmail(email);
+            if (customer == null)
+                throw new NotFoundException($"Customer with email {email} not found.");
+
+            if (!customer.IsEmailActivated)
+                throw new BadRequestException("E-mail not activated.");
+
+            var resetCode = RandomNumberGenerator.GetInt32(1_000_000).ToString("D6");
+            customer.PasswordResetCode = resetCode;
+            customer.PasswordResetCodeExpiration = DateTime.Now.AddMinutes(15);
+            customer.PasswordResetFailedAttempts = 0;
+            await _customerRepository.Update(customer);
+            await _emailService.SendPasswordResetCode(customer.Email, resetCode);
+        }
+
+        public async Task ResetPassword(string email, string code, string newPassword)
+        {
+            var customer = await _customerRepository.GetByEmail(email);
+            if (customer == null)
+                throw new NotFoundException($"Customer with email {email} not found.");
+
+            if (string.IsNullOrEmpty(customer.PasswordResetCode))
+                throw new BadRequestException("No password reset was requested.");
+
+            if (customer.PasswordResetFailedAttempts >= 5)
+                throw new BadRequestException("Too many failed attempts. Please request a new code.");
+
+            if (DateTime.Now > customer.PasswordResetCodeExpiration)
+                throw new BadRequestException("Password reset code has expired. Please request a new one.");
+
+            if (code != customer.PasswordResetCode)
+            {
+                customer.PasswordResetFailedAttempts++;
+                await _customerRepository.Update(customer);
+                throw new BadRequestException("Invalid reset code. Please try again.");
+            }
+
+            customer.Password = BCrypt.Net.BCrypt.HashPassword(newPassword);
+            customer.PasswordResetCode = null;
+            customer.PasswordResetCodeExpiration = null;
+            customer.PasswordResetFailedAttempts = null;
+            await _customerRepository.Update(customer);
+        }
+
         private async Task sendActivationCodeByEmail(Customer customer)
         {
             if (customer.IsEmailActivated)

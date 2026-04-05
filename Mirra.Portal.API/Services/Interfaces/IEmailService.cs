@@ -6,5 +6,6 @@ namespace Mirra_Portal_API.Services.Interfaces
     {
         public Task SendActivationCode(string recipientEmail, string code);
         public Task<(Token token, Customer customer)> ActivateEmail(string email, string code);
+        public Task SendPasswordResetCode(string recipientEmail, string code);
     }
 }

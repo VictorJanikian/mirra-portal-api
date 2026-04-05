@@ -102,5 +102,49 @@ namespace Mirra_Portal_API.Controllers
                 return StatusCode(500, new ErrorResponse("Erro interno do servidor: " + e.Message));
             }
         }
+
+        [HttpPost("forgot-password")]
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request)
+        {
+            try
+            {
+                await _customerService.ForgotPassword(request.Email);
+                return Ok();
+            }
+            catch (BadRequestException e)
+            {
+                return BadRequest(new ErrorResponse(e.Message));
+            }
+            catch (NotFoundException e)
+            {
+                return NotFound(new ErrorResponse(e.Message));
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, new ErrorResponse("Erro interno do servidor: " + e.Message));
+            }
+        }
+
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request)
+        {
+            try
+            {
+                await _customerService.ResetPassword(request.Email, request.Code, request.NewPassword);
+                return Ok();
+            }
+            catch (BadRequestException e)
+            {
+                return BadRequest(new ErrorResponse(e.Message));
+            }
+            catch (NotFoundException e)
+            {
+                return NotFound(new ErrorResponse(e.Message));
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, new ErrorResponse("Erro interno do servidor: " + e.Message));
+            }
+        }
     }
 }
