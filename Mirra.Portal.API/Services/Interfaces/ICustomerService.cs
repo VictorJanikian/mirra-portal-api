@@ -7,6 +7,6 @@ namespace Mirra_Portal_API.Services.Interfaces
         public Task<Customer> RegisterCustomer(Customer customer);
         public Task<Customer> GetCustomerById(int customerId);
         public Task ForgotPassword(string email);
-        public Task ResetPassword(string email, string code, string newPassword);
+        public Task<(Token token, Customer customer)> ResetPassword(string email, string code, string newPassword);
     }
 }

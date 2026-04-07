@@ -130,8 +130,12 @@ namespace Mirra_Portal_API.Controllers
         {
             try
             {
-                await _customerService.ResetPassword(request.Email, request.Code, request.NewPassword);
-                return Ok();
+                var resetResult = await _customerService.ResetPassword(request.Email, request.Code, request.NewPassword);
+                var token = resetResult.token;
+                var customer = resetResult.customer;
+                var resetResponse = _mapper.Map<ResetPasswordResponse>(customer);
+                resetResponse.Token = token;
+                return Ok(resetResponse);
             }
             catch (BadRequestException e)
             {

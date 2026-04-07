@@ -10,11 +10,13 @@ namespace Mirra_Portal_API.Services
     {
         ICustomerRepository _customerRepository;
         IEmailService _emailService;
+        ITokenService _tokenService;
 
-        public CustomerService(ICustomerRepository customerRepository, IEmailService emailService)
+        public CustomerService(ICustomerRepository customerRepository, IEmailService emailService, ITokenService tokenService)
         {
             _customerRepository = customerRepository;
             _emailService = emailService;
+            _tokenService = tokenService;
         }
 
         public async Task<Customer> RegisterCustomer(Customer newCustomer)
@@ -83,7 +85,7 @@ namespace Mirra_Portal_API.Services
             await _emailService.SendPasswordResetCode(customer.Email, resetCode);
         }
 
-        public async Task ResetPassword(string email, string code, string newPassword)
+        public async Task<(Token token, Customer customer)> ResetPassword(string email, string code, string newPassword)
         {
             var customer = await _customerRepository.GetByEmail(email);
             if (customer == null)
@@ -109,7 +111,9 @@ namespace Mirra_Portal_API.Services
             customer.PasswordResetCode = null;
             customer.PasswordResetCodeExpiration = null;
             customer.PasswordResetFailedAttempts = null;
-            await _customerRepository.Update(customer);
+            var updatedCustomer = await _customerRepository.Update(customer);
+            var token = _tokenService.GenerateToken(updatedCustomer);
+            return (token, updatedCustomer);
         }
 
         private async Task sendActivationCodeByEmail(Customer customer)
