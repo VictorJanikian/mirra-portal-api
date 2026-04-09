@@ -2,6 +2,7 @@
 using Mirra_Portal_API.Enums;
 using Mirra_Portal_API.Exceptions;
 using Mirra_Portal_API.Helper;
+using Mirra_Portal_API.Integration.Interfaces;
 using Mirra_Portal_API.Model;
 using Mirra_Portal_API.Services.Interfaces;
 
@@ -15,6 +16,7 @@ namespace Mirra_Portal_API.Services
         IdentityHelper _identityHelper;
         SymmetricEncryptionHelper _symmetricEncryptionHelper;
         ISubscriptionPlanEvaluator _subscriptionPlanEvaluator;
+        IWordpressIntegration _wordpressIntegration;
         ICronService _cronService;
 
         public ConfigurationService(ICustomerPlatformConfigurationRepository configurationRepository,
@@ -23,7 +25,8 @@ namespace Mirra_Portal_API.Services
                                     ISchedulingRepository schedulingRepository,
                                     ICustomerRepository customerRepository,
                                     ISubscriptionPlanEvaluator subscriptionPlanEvaluator,
-                                    ICronService cronService)
+                                    ICronService cronService,
+                                    IWordpressIntegration wordpressIntegration)
         {
             _configurationRepository = configurationRepository;
             _identityHelper = identityHelper;
@@ -32,11 +35,13 @@ namespace Mirra_Portal_API.Services
             _customerRepository = customerRepository;
             _subscriptionPlanEvaluator = subscriptionPlanEvaluator;
             _cronService = cronService;
+            _wordpressIntegration = wordpressIntegration;
         }
 
         public async Task<CustomerPlatformConfiguration> CreateConfiguration(CustomerPlatformConfiguration configuration)
         {
             validateIntervalsFormat(configuration);
+            await CheckIfIsValidWordPressSite(configuration.Url);
 
             var customer = await _customerRepository.GetById(_identityHelper.UserId());
             var customerConfigurations = await _configurationRepository.GetAllForCustomer(_identityHelper.UserId());
@@ -58,6 +63,10 @@ namespace Mirra_Portal_API.Services
             return await _configurationRepository.Create(configuration);
         }
 
+        private async Task CheckIfIsValidWordPressSite(string url)
+        {
+            await _wordpressIntegration.checkIfIsValidWordPressSite(url);
+        }
 
         public async Task<CustomerPlatformConfiguration> GetConfiguration(int configurationId)
         {

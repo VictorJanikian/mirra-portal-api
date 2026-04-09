@@ -97,6 +97,8 @@ void addServices(IServiceCollection services)
     services.AddScoped<ICustomerRepository, CustomerRepository>();
     services.AddScoped<ISchedulingRepository, SchedulingRepository>();
     services.AddScoped<ISubscriptionRepository, SubscriptionRepository>();
+    services.AddScoped<IWordpressIntegration, WordpressIntegration>();
+    services.AddScoped<IRestClient, RestClient>();
     services.AddScoped<IdentityHelper>();
     services.AddScoped<SymmetricEncryptionHelper>();
 }
