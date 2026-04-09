@@ -15,8 +15,15 @@ namespace Mirra_Portal_API.Integration
         public async Task checkIfIsValidWordPressSite(string url)
         {
             url = url.TrimEnd('/');
-            using var wordpressResponse = await _restClient.get(url + "/wp-json/");
-            if (wordpressResponse.StatusCode != System.Net.HttpStatusCode.OK)
+            try
+            {
+                using var wordpressResponse = await _restClient.get(url + "/wp-json/");
+                if (wordpressResponse.StatusCode != System.Net.HttpStatusCode.OK)
+                {
+                    throw new BadRequestException("The provided URL is not a valid WordPress site.");
+                }
+            }
+            catch (HttpRequestException ex)
             {
                 throw new BadRequestException("The provided URL is not a valid WordPress site.");
             }
