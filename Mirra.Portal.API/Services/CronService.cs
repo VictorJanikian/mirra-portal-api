@@ -134,8 +134,7 @@ namespace Mirra_Portal_API.Services
 
             foreach (var schedule in configuration.Schedulings)
             {
-                if (!CronExpression.TryParse(schedule.Interval, CronFormat.Standard, out _))
-                    throw new BadRequestException("Interval must be a 5 fields valid cron expression (ex.: \"0 2 * * 1\").");
+                ValidateIntervalFormat(schedule);
             }
         }
 
@@ -154,6 +153,13 @@ namespace Mirra_Portal_API.Services
         {
             if (!CronExpression.TryParse(scheduling.Interval, CronFormat.Standard, out _))
                 throw new BadRequestException("Interval must be a 5 fields valid cron expression (ex.: \"0 2 * * 1\").");
+
+            if (!scheduling.Interval.StartsWith("0 ")
+                && !scheduling.Interval.StartsWith("15 ")
+                && !scheduling.Interval.StartsWith("30 ")
+                && !scheduling.Interval.StartsWith("45 "))
+
+                throw new BadRequestException("Minute must be either 0, 15, 30 or 45 (ex.: \"0 2 * * 1\").");
         }
     }
 }
