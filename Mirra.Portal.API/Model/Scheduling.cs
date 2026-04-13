@@ -6,6 +6,7 @@
         public CustomerPlatformConfiguration CustomerPlatformConfiguration { get; set; }
         public Parameters Parameters { get; set; }
         public string Interval { get; set; }
+        public string Timezone { get; set; }
         public int RunsPerWeek { get; set; }
         public SchedulingStatus SchedulingStatus { get; set; }
     }

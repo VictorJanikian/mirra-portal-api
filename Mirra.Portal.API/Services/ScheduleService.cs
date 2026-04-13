@@ -32,6 +32,7 @@ namespace Mirra_Portal_API.Services
         public async Task<Scheduling> CreateSchedule(int configurationId, Scheduling scheduling)
         {
             validateIntervalFormat(scheduling);
+            scheduling.Interval = _cronService.ConvertCronToUtc(scheduling.Interval, scheduling.Timezone);
             await checkIfConfigurationBelongsToCustomer(configurationId);
             scheduling.RunsPerWeek = _cronService.CalculateMaxRunsPerWeek(scheduling.Interval);
             var customer = await getCustomerByConfigurationId(configurationId);
@@ -58,6 +59,7 @@ namespace Mirra_Portal_API.Services
             await checkIfConfigurationBelongsToCustomer(configurationId);
             await checkIfSchedulingBelongsToConfiguration(configurationId, schedulingId);
             validateIntervalFormat(scheduling);
+            scheduling.Interval = _cronService.ConvertCronToUtc(scheduling.Interval, scheduling.Timezone);
 
             var customer = await _customerRepository.GetById(_identityHelper.UserId());
             var configuration = await _configurationRepository.GetById(configurationId);

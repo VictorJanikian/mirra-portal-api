@@ -54,6 +54,7 @@ namespace Mirra_Portal_API.Services
 
             foreach (var schedule in configuration.Schedulings)
             {
+                schedule.Interval = _cronService.ConvertCronToUtc(schedule.Interval, schedule.Timezone);
                 schedule.RunsPerWeek = _cronService.CalculateMaxRunsPerWeek(schedule.Interval);
                 schedule.SchedulingStatus = new SchedulingStatus { Id = (int)ESchedulingStatus.ACTIVE };
             }

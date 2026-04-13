@@ -161,5 +161,183 @@ namespace Mirra_Portal_API.Services
 
                 throw new BadRequestException("Minute must be either 0, 15, 30 or 45 (ex.: \"0 2 * * 1\").");
         }
+
+        public string ConvertCronToUtc(string cronExpression, string timeZoneId)
+        {
+            if (string.IsNullOrWhiteSpace(timeZoneId))
+                throw new BadRequestException("Timezone is required.");
+
+            TimeZoneInfo tz;
+            try
+            {
+                tz = TimeZoneInfo.FindSystemTimeZoneById(timeZoneId);
+            }
+            catch (TimeZoneNotFoundException)
+            {
+                throw new BadRequestException($"Invalid timezone: '{timeZoneId}'.");
+            }
+
+            var offset = tz.BaseUtcOffset;
+            if (offset == TimeSpan.Zero) return cronExpression;
+
+            var fields = cronExpression.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            if (fields.Length != 5)
+                throw new BadRequestException("Cron expression must have 5 fields.");
+
+            int localMinute = int.Parse(fields[0]);
+            int offsetTotalMinutes = (int)offset.TotalMinutes;
+
+            var localHours = ExpandField(fields[1], 0, 23);
+
+            var utcHours = new SortedSet<int>();
+            int? consistentDayShift = null;
+            int utcMinute = 0;
+
+            foreach (int localHour in localHours)
+            {
+                utcMinute = calculateUtcMinutesAndHours(localMinute, offsetTotalMinutes, utcHours, ref consistentDayShift, localHour);
+            }
+
+            string utcHourField = CompressField(utcHours.ToList());
+
+            string dayOfWeekField = fields[4];
+            string dayOfMonthField = fields[2];
+
+            if (consistentDayShift.HasValue && consistentDayShift.Value != 0)
+            {
+                dayOfWeekField = calculateUtcDayOfWeek(consistentDayShift, dayOfWeekField);
+
+                dayOfMonthField = calculateUtcDayOfMonth(consistentDayShift, dayOfMonthField);
+            }
+
+            return $"{utcMinute} {utcHourField} {dayOfMonthField} {fields[3]} {dayOfWeekField}";
+        }
+
+        private string calculateUtcDayOfMonth(int? consistentDayShift, string dayOfMonthField)
+        {
+            if (dayOfMonthField != "*" && dayOfMonthField != "?")
+            {
+                var localDays = ExpandField(dayOfMonthField, 1, 31);
+                var utcDays = new SortedSet<int>();
+                foreach (int day in localDays)
+                {
+                    int shifted = day + consistentDayShift.Value;
+                    if (shifted < 1) shifted += 31;
+                    if (shifted > 31) shifted -= 31;
+                    utcDays.Add(shifted);
+                }
+                dayOfMonthField = CompressField(utcDays.ToList());
+            }
+
+            return dayOfMonthField;
+        }
+
+        private string calculateUtcDayOfWeek(int? consistentDayShift, string dayOfWeekField)
+        {
+            if (dayOfWeekField != "*" && dayOfWeekField != "?")
+            {
+                var localDays = ExpandField(dayOfWeekField, 0, 6);
+                var utcDays = new SortedSet<int>();
+                foreach (int day in localDays)
+                {
+                    int shifted = (day + consistentDayShift.Value % 7 + 7) % 7;
+                    utcDays.Add(shifted);
+                }
+                dayOfWeekField = CompressField(utcDays.ToList());
+            }
+
+            return dayOfWeekField;
+        }
+
+        private static int calculateUtcMinutesAndHours(int localMinute, int offsetTotalMinutes, SortedSet<int> utcHours, ref int? consistentDayShift, int localHour)
+        {
+            int utcMinute;
+            int totalUtcMinutes = localHour * 60 + localMinute - offsetTotalMinutes;
+
+            int dayShift = 0;
+            while (totalUtcMinutes < 0) { totalUtcMinutes += 1440; dayShift--; }
+            while (totalUtcMinutes >= 1440) { totalUtcMinutes -= 1440; dayShift++; }
+
+            utcMinute = totalUtcMinutes % 60;
+            utcHours.Add(totalUtcMinutes / 60);
+
+            if (consistentDayShift == null)
+                consistentDayShift = dayShift;
+            else if (consistentDayShift != dayShift)
+                throw new BadRequestException(
+                    "The combination of this cron expression and timezone results in a day boundary split that cannot be represented as a single UTC cron expression. Please simplify the hour field.");
+            return utcMinute;
+        }
+
+        private SortedSet<int> ExpandField(string field, int min, int max)
+        {
+            var values = new SortedSet<int>();
+
+            if (field == "*" || field == "?")
+            {
+                for (int i = min; i <= max; i++)
+                    values.Add(i);
+                return values;
+            }
+
+            foreach (var part in field.Split(','))
+            {
+                if (part.Contains('/'))
+                {
+                    var stepParts = part.Split('/');
+                    int step = int.Parse(stepParts[1]);
+                    int start = stepParts[0] == "*" ? min : int.Parse(stepParts[0]);
+                    for (int i = start; i <= max; i += step)
+                        values.Add(i);
+                }
+                else if (part.Contains('-'))
+                {
+                    var rangeParts = part.Split('-');
+                    int start = int.Parse(rangeParts[0]);
+                    int end = int.Parse(rangeParts[1]);
+                    for (int i = start; i <= end; i++)
+                        values.Add(i);
+                }
+                else if (int.TryParse(part, out int value))
+                {
+                    values.Add(value);
+                }
+            }
+
+            return values;
+        }
+
+        private string CompressField(List<int> values)
+        {
+            if (values.Count == 0) return "*";
+
+            var parts = new List<string>();
+            int i = 0;
+
+            while (i < values.Count)
+            {
+                int start = values[i];
+                int end = start;
+
+                while (i + 1 < values.Count && values[i + 1] == end + 1)
+                {
+                    end = values[++i];
+                }
+
+                if (start == end)
+                    parts.Add(start.ToString());
+                else if (end == start + 1)
+                {
+                    parts.Add(start.ToString());
+                    parts.Add(end.ToString());
+                }
+                else
+                    parts.Add($"{start}-{end}");
+
+                i++;
+            }
+
+            return string.Join(",", parts);
+        }
     }
 }
