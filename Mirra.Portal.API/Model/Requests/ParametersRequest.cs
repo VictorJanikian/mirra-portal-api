@@ -5,7 +5,6 @@ namespace Mirra_Portal_API.Model.Requests
     public class ParametersRequest
     {
         [Required(ErrorMessage = "Title can't be empty.")]
-        [MinLength(1, ErrorMessage = "Title can't be empty.")]
         public string ThemeTitle { get; set; }
         public string TargetAudience { get; set; }
         public string Style { get; set; }
