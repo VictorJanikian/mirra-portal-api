@@ -21,6 +21,7 @@ namespace Mirra_Portal_API.Database.Repositories
             row.CustomerPlatformConfigurationId = scheduling.CustomerPlatformConfiguration.Id;
             _context.Schedulings.Add(row);
             await _context.SaveChangesAsync();
+            row.SchedulingStatus = new SchedulingStatusTableRow() { Id = row.SchedulingStatusId.GetValueOrDefault() };
             return _mapper.Map<Scheduling>(row);
         }
 
