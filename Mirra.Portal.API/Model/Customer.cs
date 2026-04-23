@@ -16,5 +16,7 @@
         public string? PasswordResetCode { get; set; }
         public DateTime? PasswordResetCodeExpiration { get; set; }
         public int? PasswordResetFailedAttempts { get; set; }
+        public string Country { get; set; }
+
     }
 }

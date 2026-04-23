@@ -15,5 +15,11 @@ namespace Mirra_Portal_API.Model.Requests
         [Required]
         [MinLength(1, ErrorMessage = "Password can't be empty.")]
         public string Password { get; set; }
+
+
+        [Required]
+        [MinLength(1, ErrorMessage = "Country can't be empty.")]
+        public string Country { get; set; }
+
     }
 }
