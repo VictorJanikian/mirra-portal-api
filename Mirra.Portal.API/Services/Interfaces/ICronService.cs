@@ -9,5 +9,6 @@ namespace Mirra_Portal_API.Services.Interfaces
         public Task<int> CalculateTotalRunsPerWeekForConfiguration(CustomerPlatformConfiguration configuration);
         public void ValidateIntervalFormat(Scheduling scheduling);
         public string ConvertCronToUtc(string cronExpression, string timeZoneId);
+        public string ConvertCronToLocal(string utcCronExpression, string timeZoneId);
     }
 }
