@@ -202,34 +202,55 @@ namespace Mirra_Portal_API.Services
 
             string dayOfWeekField = fields[4];
             string dayOfMonthField = fields[2];
+            string monthField = fields[3];
 
             if (consistentDayShift.HasValue && consistentDayShift.Value != 0)
             {
                 dayOfWeekField = calculateUtcDayOfWeek(consistentDayShift, dayOfWeekField);
 
-                dayOfMonthField = calculateUtcDayOfMonth(consistentDayShift, dayOfMonthField);
+                (dayOfMonthField, monthField) = calculateUtcDayAndMonth(consistentDayShift.Value, dayOfMonthField, monthField);
             }
 
-            return $"{utcMinute} {utcHourField} {dayOfMonthField} {fields[3]} {dayOfWeekField}";
+            return $"{utcMinute} {utcHourField} {dayOfMonthField} {monthField} {dayOfWeekField}";
         }
 
-        private string calculateUtcDayOfMonth(int? consistentDayShift, string dayOfMonthField)
+        private (string dayOfMonth, string month) calculateUtcDayAndMonth(int dayShift, string dayOfMonthField, string monthField)
         {
-            if (dayOfMonthField != "*" && dayOfMonthField != "?")
+            bool dayIsWildcard = dayOfMonthField == "*" || dayOfMonthField == "?";
+            bool monthIsWildcard = monthField == "*" || monthField == "?";
+
+            if (dayIsWildcard) return (dayOfMonthField, monthField);
+
+            var localMonths = monthIsWildcard
+                ? new SortedSet<int>(Enumerable.Range(1, 12))
+                : ExpandField(monthField, 1, 12);
+            var localDays = ExpandField(dayOfMonthField, 1, 31);
+
+            var utcPairs = new HashSet<(int month, int day)>();
+            const int referenceYear = 2024;
+
+            foreach (int month in localMonths)
             {
-                var localDays = ExpandField(dayOfMonthField, 1, 31);
-                var utcDays = new SortedSet<int>();
+                int daysInMonth = DateTime.DaysInMonth(referenceYear, month);
                 foreach (int day in localDays)
                 {
-                    int shifted = day + consistentDayShift.Value;
-                    if (shifted < 1) shifted += 31;
-                    if (shifted > 31) shifted -= 31;
-                    utcDays.Add(shifted);
+                    if (day > daysInMonth) continue;
+                    var shifted = new DateTime(referenceYear, month, day).AddDays(dayShift);
+                    utcPairs.Add((shifted.Month, shifted.Day));
                 }
-                dayOfMonthField = CompressField(utcDays.ToList());
             }
 
-            return dayOfMonthField;
+            var utcMonths = utcPairs.Select(p => p.month).Distinct().OrderBy(m => m).ToList();
+            var utcDays = utcPairs.Select(p => p.day).Distinct().OrderBy(d => d).ToList();
+
+            if (utcMonths.Count * utcDays.Count != utcPairs.Count)
+                throw new BadRequestException(
+                    "The combination of this cron expression and timezone results in a day/month split that cannot be represented as a single UTC cron expression. Please simplify the day or month field.");
+
+            string utcMonthField = monthIsWildcard && utcMonths.Count == 12 ? "*" : CompressField(utcMonths);
+            string utcDayField = CompressField(utcDays);
+
+            return (utcDayField, utcMonthField);
         }
 
         private string calculateUtcDayOfWeek(int? consistentDayShift, string dayOfWeekField)
