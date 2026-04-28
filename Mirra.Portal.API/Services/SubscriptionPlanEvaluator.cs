@@ -7,9 +7,9 @@ namespace Mirra_Portal_API.Services
     public class SubscriptionPlanEvaluator : ISubscriptionPlanEvaluator
     {
         private ILogger<SubscriptionPlanEvaluator> _logger;
-        private ISubscriptionRepository _subscriptionRepository;
+        private ISubscriptionPlanRepository _subscriptionRepository;
 
-        public SubscriptionPlanEvaluator(ILogger<SubscriptionPlanEvaluator> logger, ISubscriptionRepository subscriptionRepository)
+        public SubscriptionPlanEvaluator(ILogger<SubscriptionPlanEvaluator> logger, ISubscriptionPlanRepository subscriptionRepository)
         {
             _logger = logger;
             _subscriptionRepository = subscriptionRepository;

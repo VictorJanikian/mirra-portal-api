@@ -10,6 +10,6 @@ namespace Mirra_Portal_API.Database.DBEntities
         public int? MaximumPosts { get; set; }
         public int? MaximumConfigurations { get; set; }
         public int Price { get; set; }
-        public string? PaymentLink { get; set; }
+        public string? DefaultPaymentLink { get; set; }
     }
 }

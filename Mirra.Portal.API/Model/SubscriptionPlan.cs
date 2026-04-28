@@ -8,6 +8,7 @@
         public int? MaximumConfigurations { get; set; }
         public int Price { get; set; } = 0;
         public string? PaymentLink { get; set; }
+        public string? DefaultPaymentLink { get; set; }
 
     }
 }

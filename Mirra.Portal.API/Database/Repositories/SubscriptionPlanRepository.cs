@@ -5,9 +5,9 @@ using Mirra_Portal_API.Model;
 
 namespace Mirra_Portal_API.Database.Repositories
 {
-    public class SubscriptionRepository : DefaultRepository, ISubscriptionRepository
+    public class SubscriptionPlanRepository : DefaultRepository, ISubscriptionPlanRepository
     {
-        public SubscriptionRepository(DatabaseContext context, IMapper mapper) : base(context, mapper)
+        public SubscriptionPlanRepository(DatabaseContext context, IMapper mapper) : base(context, mapper)
         {
         }
 

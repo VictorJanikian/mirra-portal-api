@@ -2,7 +2,7 @@
 
 namespace Mirra_Portal_API.Database.Repositories.Interfaces
 {
-    public interface ISubscriptionRepository
+    public interface ISubscriptionPlanRepository
     {
         Task<SubscriptionPlan> GetById(int id);
         Task<SubscriptionPlan> GetByPrice(int price);

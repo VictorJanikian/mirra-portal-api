@@ -5,7 +5,7 @@ meta {
 }
 
 put {
-  url: {{baseUrl_Mirra}}/api/Configuration/25/schedulings/67
+  url: {{baseUrl_Mirra}}/api/Configuration/25/schedulings/45
   body: json
   auth: bearer
 }
@@ -16,7 +16,7 @@ auth:bearer {
 
 body:json {
   {
-    "interval": "0 23 * * 1",
+    "interval": "0 23 31 4 *",
     "timezone": "America/Sao_Paulo",
     "parameters": {
       "themeTitle": "Technology",

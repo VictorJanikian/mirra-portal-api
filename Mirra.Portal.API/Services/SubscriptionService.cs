@@ -1,4 +1,5 @@
 ﻿using Mirra_Portal_API.Database.Repositories.Interfaces;
+using Mirra_Portal_API.Helper;
 using Mirra_Portal_API.Model;
 using Mirra_Portal_API.Services.Interfaces;
 
@@ -7,20 +8,27 @@ namespace Mirra_Portal_API.Services
     public class SubscriptionService : ISubscriptionService
     {
 
-        private readonly ISubscriptionRepository _subscriptionRepository;
+        private readonly ISubscriptionPlanRepository _subscriptionRepository;
         private readonly ICustomerRepository _customerRepository;
+        private readonly ISubscriptionPaymentLinkRepository _subscriptionPaymentLinkRepository;
         private readonly ICustomerPlatformConfigurationRepository _configurationRepository;
         private readonly ISubscriptionPlanEvaluator _subscriptionPlanEvaluator;
+        IdentityHelper _identityHelper;
 
-        public SubscriptionService(ISubscriptionRepository subscriptionRepository,
+        public SubscriptionService(ISubscriptionPlanRepository subscriptionRepository,
             ISubscriptionPlanEvaluator subscriptionPlanEvaluator,
             ICustomerRepository customerRepository,
-            ICustomerPlatformConfigurationRepository configurationRepository)
+            ISubscriptionPaymentLinkRepository subscriptionPaymentLinkRepository,
+            ICustomerPlatformConfigurationRepository configurationRepository,
+            IdentityHelper identityHelper)
         {
             _subscriptionRepository = subscriptionRepository;
             _subscriptionPlanEvaluator = subscriptionPlanEvaluator;
             _configurationRepository = configurationRepository;
             _customerRepository = customerRepository;
+            _subscriptionPaymentLinkRepository = subscriptionPaymentLinkRepository;
+            _identityHelper = identityHelper;
+
         }
 
         public async Task<SubscriptionPlan> GetSubscriptionPlanByPrice(int price)
@@ -30,7 +38,21 @@ namespace Mirra_Portal_API.Services
 
         public async Task<List<SubscriptionPlan>> GetAllSubscriptionPlans()
         {
-            return await _subscriptionRepository.GetAll();
+            var subscriptionPlans = await _subscriptionRepository.GetAll();
+            var customer = await _customerRepository.GetById(_identityHelper.UserId());
+
+            foreach (var subscriptionPlan in subscriptionPlans)
+            {
+                var countrySpecificPaymentLink = await _subscriptionPaymentLinkRepository.GetBySubscriptionPlanIdAndCountry(subscriptionPlan.Id, customer.Country);
+                if (countrySpecificPaymentLink != null)
+                    subscriptionPlan.PaymentLink = countrySpecificPaymentLink.PaymentLink;
+                else
+                    subscriptionPlan.PaymentLink = subscriptionPlan.DefaultPaymentLink;
+
+            }
+
+            return subscriptionPlans;
+
         }
 
         public async Task<int> GetRemainingConfigurationsAllowed(int customerId)
