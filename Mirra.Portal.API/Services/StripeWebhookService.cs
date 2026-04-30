@@ -57,7 +57,7 @@ namespace Mirra_Portal_API.Services
             if (customer == null)
                 throw new NotFoundException($"Customer with email {customerEmail} not found.");
 
-            int planId = await resolvePlanFromSession(session);
+            int planId = await resolvePlanFromSession(customer, session);
 
             customer.StripeCustomerId = session.CustomerId;
             customer.StripeSubscriptionId = session.SubscriptionId;
