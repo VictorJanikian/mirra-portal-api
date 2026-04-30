@@ -86,7 +86,7 @@ namespace Mirra_Portal_API.Services
                 return;
             }
 
-            int planId = await resolvePlanFromInvoice(invoice);
+            int planId = await resolvePlanFromInvoice(customer, invoice);
 
             _logger.LogInformation(
                 "Beginning processing for plan {PlanId}.", planId);
@@ -122,7 +122,7 @@ namespace Mirra_Portal_API.Services
                     return;
                 }
 
-                int planId = await resolvePlanFromSubscription(subscription);
+                int planId = await resolvePlanFromSubscription(customer, subscription);
 
                 customer.StripeSubscriptionId = subscription.Id;
                 customer.SubscriptionPlan = new SubscriptionPlan { Id = planId };
@@ -202,12 +202,12 @@ namespace Mirra_Portal_API.Services
                 customer.Id);
         }
 
-        private async Task<int> resolvePlanFromSession(Session session)
+        private async Task<int> resolvePlanFromSession(Customer customer, Session session)
         {
 
             if (session.AmountTotal.HasValue)
             {
-                var plan = await _subscriptionService.GetSubscriptionPlanByPrice((int)session.AmountTotal.Value);
+                var plan = await _subscriptionService.GetSubscriptionPlanByPriceAndCountry((int)session.AmountTotal.Value, customer.Country);
                 if (plan != null) return plan.Id;
             }
 
@@ -215,11 +215,11 @@ namespace Mirra_Portal_API.Services
                 "Could not determine subscription plan from checkout session.");
         }
 
-        private async Task<int> resolvePlanFromInvoice(Invoice invoice)
+        private async Task<int> resolvePlanFromInvoice(Customer customer, Invoice invoice)
         {
             if (invoice != null)
             {
-                var plan = await _subscriptionService.GetSubscriptionPlanByPrice((int)invoice.AmountPaid);
+                var plan = await _subscriptionService.GetSubscriptionPlanByPriceAndCountry((int)invoice.AmountPaid, customer.Country);
                 if (plan != null) return plan.Id;
             }
 
@@ -227,7 +227,7 @@ namespace Mirra_Portal_API.Services
                 "Could not determine subscription plan from invoice.");
         }
 
-        private async Task<int> resolvePlanFromSubscription(Subscription subscription)
+        private async Task<int> resolvePlanFromSubscription(Customer customer, Subscription subscription)
         {
             if (subscription.Items?.Data != null)
             {
@@ -235,7 +235,7 @@ namespace Mirra_Portal_API.Services
                 {
                     if (item.Price != null)
                     {
-                        var plan = await _subscriptionService.GetSubscriptionPlanByPrice((int)item.Price.UnitAmount.GetValueOrDefault());
+                        var plan = await _subscriptionService.GetSubscriptionPlanByPriceAndCountry((int)item.Price.UnitAmount.GetValueOrDefault(), customer.Country);
                         if (plan != null) return plan.Id;
                     }
                 }

@@ -31,9 +31,14 @@ namespace Mirra_Portal_API.Services
 
         }
 
-        public async Task<SubscriptionPlan> GetSubscriptionPlanByPrice(int price)
+        public async Task<SubscriptionPlan> GetSubscriptionPlanByPriceAndCountry(int price, string country)
         {
-            return await _subscriptionRepository.GetByPrice(price);
+            var countrySpecificPaymentLink = await _subscriptionPaymentLinkRepository.GetByPriceAndCountry(price, country);
+            if (countrySpecificPaymentLink != null)
+                return await _subscriptionRepository.GetById(countrySpecificPaymentLink.SubscriptionPlan.Id);
+            else
+                return await _subscriptionRepository.GetByPrice(price);
+
         }
 
         public async Task<List<SubscriptionPlan>> GetAllSubscriptionPlans()

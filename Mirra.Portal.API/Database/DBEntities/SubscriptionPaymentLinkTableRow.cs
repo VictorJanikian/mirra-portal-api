@@ -11,5 +11,6 @@ namespace Mirra_Portal_API.Database.DBEntities
         public int SubscriptionPlanId { get; set; }
         public string Country { get; set; }
         public string PaymentLink { get; set; }
+        public int Price { get; set; }
     }
 }

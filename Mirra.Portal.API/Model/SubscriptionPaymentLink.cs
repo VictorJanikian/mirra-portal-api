@@ -6,5 +6,7 @@
         public SubscriptionPlan SubscriptionPlan { get; set; }
         public string Country { get; set; }
         public string PaymentLink { get; set; }
+        public int Price { get; set; }
+
     }
 }

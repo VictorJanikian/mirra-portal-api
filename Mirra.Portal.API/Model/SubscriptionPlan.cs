@@ -6,7 +6,7 @@
         public string Name { get; set; }
         public int? MaximumPosts { get; set; }
         public int? MaximumConfigurations { get; set; }
-        public int Price { get; set; } = 0;
+        public int DefaultPrice { get; set; } = 0;
         public string? PaymentLink { get; set; }
         public string? DefaultPaymentLink { get; set; }
 

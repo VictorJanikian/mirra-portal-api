@@ -4,7 +4,7 @@ namespace Mirra_Portal_API.Services.Interfaces
 {
     public interface ISubscriptionService
     {
-        public Task<SubscriptionPlan> GetSubscriptionPlanByPrice(int price);
+        public Task<SubscriptionPlan> GetSubscriptionPlanByPriceAndCountry(int price, string country);
         public Task<List<SubscriptionPlan>> GetAllSubscriptionPlans();
         public Task<int> GetRemainingConfigurationsAllowed(int customerId);
 

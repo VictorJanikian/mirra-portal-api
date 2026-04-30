@@ -29,7 +29,7 @@ namespace Mirra_Portal_API.Database.Repositories
         {
             var row = await _context.SubscriptionPlans
                 .AsNoTracking()
-                .Where(subscriptionPlan => subscriptionPlan.Price == price)
+                .Where(subscriptionPlan => subscriptionPlan.DefaultPrice == price)
                 .FirstOrDefaultAsync();
 
             if (row != null)

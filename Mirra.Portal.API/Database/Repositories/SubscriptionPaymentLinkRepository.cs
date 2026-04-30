@@ -22,5 +22,17 @@ namespace Mirra_Portal_API.Database.Repositories
             return _mapper.Map<SubscriptionPaymentLink>(row);
 
         }
+
+        public async Task<SubscriptionPaymentLink> GetByPriceAndCountry(int price, string country)
+        {
+            var row = await _context
+                .SubscriptionPaymentLinks
+                .FirstOrDefaultAsync(s => s.Country == country && s.Price == price);
+
+            if (row == null) return null;
+
+            return _mapper.Map<SubscriptionPaymentLink>(row);
+
+        }
     }
 }
