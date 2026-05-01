@@ -27,6 +27,7 @@ namespace Mirra_Portal_API.Database.Repositories
         {
             var row = await _context
                 .SubscriptionPaymentLinks
+                .Include(paymentLink => paymentLink.SubscriptionPlan)
                 .FirstOrDefaultAsync(s => s.Country == country && s.Price == price);
 
             if (row == null) return null;

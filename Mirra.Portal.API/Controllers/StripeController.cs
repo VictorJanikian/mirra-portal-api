@@ -100,7 +100,7 @@ namespace Mirra_Portal_API.Controllers
 
 
 
-        public async Task<IActionResult> TestStripe()
+        public async Task<IActionResult> TestStripeSubscriptionUpdated()
         {
 
             var stripeEvent = new Stripe.Event();
@@ -113,6 +113,19 @@ namespace Mirra_Portal_API.Controllers
             ((Stripe.Subscription)stripeEvent.Data.Object).Items.Data[0].Price = new Stripe.Price();
             ((Stripe.Subscription)stripeEvent.Data.Object).Items.Data[0].Price.UnitAmount = 1400;
             await _stripeWebhookService.HandleSubscriptionUpdated(stripeEvent);
+            return Ok();
+        }
+
+        [HttpPost("test")]
+        public async Task<IActionResult> TestStripeInvoicePaid()
+        {
+
+            var stripeEvent = new Stripe.Event();
+            stripeEvent.Data = new EventData();
+            stripeEvent.Data.Object = new Stripe.Invoice();
+            ((Stripe.Invoice)stripeEvent.Data.Object).AmountPaid = 7000;
+            ((Stripe.Invoice)stripeEvent.Data.Object).CustomerEmail = "mirra-ai2@outlook.com";
+            await _stripeWebhookService.HandleInvoicePaymentSucceeded(stripeEvent);
             return Ok();
         }
 
