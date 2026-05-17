@@ -22,6 +22,7 @@ namespace Mirra_Portal_API.Database.DBEntities
         public DateTime? PasswordResetCodeExpiration { get; set; }
         public int? PasswordResetFailedAttempts { get; set; }
         public string? Country { get; set; }
+        public string? ReferralCode { get; set; }
         public DateTime? CreatedAt { get; set; }
 
 

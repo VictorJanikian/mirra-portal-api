@@ -21,5 +21,7 @@ namespace Mirra_Portal_API.Model.Requests
         [MinLength(1, ErrorMessage = "Country can't be empty.")]
         public string Country { get; set; }
 
+        public string? ReferralCode { get; set; }
+
     }
 }
