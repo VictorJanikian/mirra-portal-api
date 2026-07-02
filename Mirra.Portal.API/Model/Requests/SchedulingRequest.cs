@@ -4,6 +4,7 @@
     {
         public string Interval { get; set; }
         public string Timezone { get; set; }
+        public int ContentTypeId { get; set; }
 
         public ParametersRequest Parameters { get; set; }
     }

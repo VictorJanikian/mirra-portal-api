@@ -8,6 +8,7 @@
         public string Interval { get; set; }
         public string ConvertedInterval { get; set; }
         public string Timezone { get; set; }
+        public int ContentTypeId { get; set; }
         public int RunsPerWeek { get; set; }
         public SchedulingStatus SchedulingStatus { get; set; }
     }

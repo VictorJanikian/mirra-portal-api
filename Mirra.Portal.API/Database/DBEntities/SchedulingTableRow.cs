@@ -11,6 +11,7 @@ namespace Mirra_Portal_API.Database.DBEntities
         public ParametersTableRow Parameters { get; set; }
         public string Interval { get; set; }
         public string Timezone { get; set; }
+        public int ContentTypeId { get; set; }
         public int RunsPerWeek { get; set; }
         public int? SchedulingStatusId { get; set; }
         public SchedulingStatusTableRow SchedulingStatus { get; set; }
