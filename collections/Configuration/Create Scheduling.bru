@@ -11,7 +11,7 @@ post {
 }
 
 params:path {
-  configurationId: 25
+  configurationId: 31
 }
 
 auth:bearer {
@@ -20,7 +20,8 @@ auth:bearer {
 
 body:json {
   {
-    "interval": "0 15 * * 1",
+    "interval": "0 18 1 * 1",
+    "ContentTypeId": 1,
     "timezone": "America/Sao_Paulo",
     "parameters": {
       "themeTitle": "Technology",

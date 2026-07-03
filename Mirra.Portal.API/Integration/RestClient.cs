@@ -8,9 +8,7 @@ namespace Mirra_Portal_API.Integration
         public async Task<HttpResponseMessage> get(string url)
         {
             using var client = new HttpClient();
-            using var response = await client.GetAsync(url);
-            return response;
-
+            return await client.GetAsync(url);
         }
     }
 }

@@ -21,8 +21,19 @@ namespace Mirra_Portal_API.Database.Repositories
 
             _context.CustomerPlatformsConfiguration.Add(row);
             await _context.SaveChangesAsync();
-            configuration.Id = row.Id;
+
+            PropagateGeneratedIds(configuration, row);
             return configuration;
+        }
+
+        private static void PropagateGeneratedIds(CustomerPlatformConfiguration configuration, CustomerPlatformConfigurationTableRow row)
+        {
+            configuration.Id = row.Id;
+
+            if (configuration.Schedulings == null) return;
+
+            for (int index = 0; index < configuration.Schedulings.Count; index++)
+                configuration.Schedulings[index].Id = row.Schedulings[index].Id;
         }
 
         public Task<List<CustomerPlatformConfiguration>> GetAllForCustomer(int customerId)
