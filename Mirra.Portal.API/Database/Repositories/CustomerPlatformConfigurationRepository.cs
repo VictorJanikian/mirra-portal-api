@@ -89,5 +89,49 @@ namespace Mirra_Portal_API.Database.Repositories
 
             return _mapper.Map<CustomerPlatformConfiguration>(row);
         }
+
+        public async Task<CustomerPlatformConfiguration> GetByInstagramState(string state)
+        {
+            return await _context.CustomerPlatformsConfiguration
+                .AsNoTracking()
+                .Where(configuration => configuration.InstagramState == state)
+                .ProjectTo<CustomerPlatformConfiguration>(_mapper.ConfigurationProvider)
+                .FirstOrDefaultAsync();
+        }
+
+        public async Task SaveInstagramCredentials(int configurationId,
+                                                   InstagramProfile profile,
+                                                   InstagramAccessToken token,
+                                                   List<string> permissions)
+        {
+            await _context.CustomerPlatformsConfiguration
+                .Where(configuration => configuration.Id == configurationId)
+                .ExecuteUpdateAsync(setters => setters
+                    .SetProperty(configuration => configuration.InstagramState, (string)null)
+                    .SetProperty(configuration => configuration.InstagramAccessToken, token.AccessToken)
+                    .SetProperty(configuration => configuration.InstagramTokenExpiresAt, token.ExpiresAt())
+                    .SetProperty(configuration => configuration.InstagramUserId, profile.UserId)
+                    .SetProperty(configuration => configuration.InstagramUsername, profile.Username));
+
+            await ReplaceInstagramPermissions(configurationId, permissions);
+        }
+
+        private async Task ReplaceInstagramPermissions(int configurationId, List<string> permissions)
+        {
+            if (permissions == null || permissions.Count == 0) return;
+
+            await _context.InstagramPermissions
+                .Where(permission => permission.CustomerPlatformConfigurationId == configurationId)
+                .ExecuteDeleteAsync();
+
+            _context.InstagramPermissions.AddRange(permissions.Select(permission => new InstagramPermissionTableRow
+            {
+                Permission = permission,
+                CustomerPlatformConfigurationId = configurationId,
+                CreatedAt = DateTime.Now
+            }));
+
+            await _context.SaveChangesAsync();
+        }
     }
 }

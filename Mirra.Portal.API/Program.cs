@@ -28,6 +28,8 @@ addAutoMapper(builder.Services);
 addServices(builder.Services);
 configureJwt(builder.Services);
 builder.Services.Configure<StripeSettings>(configuration.GetSection("Stripe"));
+builder.Services.Configure<InstagramSettings>(configuration.GetSection("Instagram"));
+builder.Services.Configure<ApplicationSettings>(configuration);
 
 var app = builder.Build();
 
@@ -99,6 +101,8 @@ void addServices(IServiceCollection services)
     services.AddScoped<ISubscriptionPaymentLinkRepository, SubscriptionPaymentLinkRepository>();
     services.AddScoped<ISubscriptionPlanRepository, SubscriptionPlanRepository>();
     services.AddScoped<IWordpressIntegration, WordpressIntegration>();
+    services.AddScoped<IInstagramIntegration, InstagramIntegration>();
+    services.AddScoped<IInstagramService, InstagramService>();
     services.AddScoped<IRestClient, RestClient>();
     services.AddScoped<IdentityHelper>();
     services.AddScoped<SymmetricEncryptionHelper>();

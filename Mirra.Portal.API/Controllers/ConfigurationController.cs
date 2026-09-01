@@ -17,15 +17,69 @@ namespace Mirra_Portal_API.Controllers
     {
         IConfigurationService _configurationService;
         IScheduleService _scheduleService;
+        IInstagramService _instagramService;
         IMapper _mapper;
 
         public ConfigurationController(IConfigurationService configurationService,
                                        IMapper mapper,
-                                       IScheduleService scheduleService)
+                                       IScheduleService scheduleService,
+                                       IInstagramService instagramService)
         {
             _configurationService = configurationService;
             _mapper = mapper;
             _scheduleService = scheduleService;
+            _instagramService = instagramService;
+        }
+
+        [HttpGet("instagram/start")]
+        public async Task<IActionResult> StartInstagramAuthorization()
+        {
+            try
+            {
+                var authorizationUrl = await _instagramService.StartAuthorization();
+                return Redirect(authorizationUrl);
+            }
+            catch (BadRequestException e)
+            {
+                return BadRequest(new ErrorResponse(e.Message));
+            }
+            catch (NotFoundException e)
+            {
+                return NotFound(new ErrorResponse(e.Message));
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, new ErrorResponse("Erro interno do servidor: " + e.Message));
+            }
+        }
+
+        [AllowAnonymous]
+        [HttpGet("instagram/callback")]
+        public async Task<IActionResult> InstagramCallback([FromQuery] string code,
+                                                           [FromQuery] string state,
+                                                           [FromQuery] string permissions)
+        {
+            try
+            {
+                var homeUrl = await _instagramService.HandleCallback(code, state, permissions);
+                return Redirect(homeUrl);
+            }
+            catch (BadRequestException e)
+            {
+                return BadRequest(new ErrorResponse(e.Message));
+            }
+            catch (UnauthorizedException e)
+            {
+                return Unauthorized(new ErrorResponse(e.Message));
+            }
+            catch (NotFoundException e)
+            {
+                return NotFound(new ErrorResponse(e.Message));
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, new ErrorResponse("Erro interno do servidor: " + e.Message));
+            }
         }
 
         [HttpPost("{configurationId}/schedulings/")]

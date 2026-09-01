@@ -9,6 +9,11 @@
         public string Username { get; set; }
         public string Password { get; set; }
         public int RemainingRunsPerWeek { get; set; }
+        public string InstagramState { get; set; }
+        public long? InstagramUserId { get; set; }
+        public string InstagramAccessToken { get; set; }
+        public DateTime? InstagramTokenExpiresAt { get; set; }
+        public string InstagramUsername { get; set; }
         public List<Scheduling> Schedulings { get; set; }
     }
 }

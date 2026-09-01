@@ -11,6 +11,7 @@ namespace Mirra_Portal_API.Database.Mapper
             CreateMap<CustomerPlatformConfiguration, CustomerPlatformConfigurationTableRow>()
                 .ForMember(row => row.Customer, options => options.Ignore())
                 .ForMember(row => row.Platform, options => options.Ignore())
+                .ForMember(row => row.InstagramPermissions, options => options.Ignore())
 
                 .ForMember(row => row.PlatformId, options => options.MapFrom(entity => entity.Platform.Id))
                 .ForMember(row => row.CustomerId, options => options.MapFrom(entity => entity.Customer.Id));

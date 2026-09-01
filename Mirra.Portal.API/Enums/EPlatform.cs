@@ -2,6 +2,7 @@
 {
     public enum EPlatform
     {
-        WORDPRESS = 1
+        WORDPRESS = 1,
+        INSTAGRAM = 2
     }
 }
