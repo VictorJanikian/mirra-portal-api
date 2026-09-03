@@ -93,7 +93,8 @@ namespace Mirra_Portal_API.Database.Repositories
         {
             await _context.Schedulings
                 .Where(scheduling => scheduling.Id == schedulingId)
-                .ExecuteDeleteAsync();
+                .ExecuteUpdateAsync(setters => setters
+                    .SetProperty(scheduling => scheduling.IsDeleted, true));
         }
 
         public async Task<bool> HasAnyByCustomerIdAndStatus(int customerId, ESchedulingStatus status)
