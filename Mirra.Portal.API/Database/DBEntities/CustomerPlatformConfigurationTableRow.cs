@@ -13,6 +13,7 @@ namespace Mirra_Portal_API.Database.DBEntities
         public string Url { get; set; }
         public string Username { get; set; }
         public string Password { get; set; }
+        public bool IsDeleted { get; set; }
         public List<SchedulingTableRow> Schedulings { get; set; }
     }
 }

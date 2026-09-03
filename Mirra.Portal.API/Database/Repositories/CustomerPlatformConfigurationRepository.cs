@@ -60,11 +60,13 @@ namespace Mirra_Portal_API.Database.Repositories
         {
             await _context.Schedulings
                 .Where(s => s.CustomerPlatformConfigurationId == id)
-                .ExecuteDeleteAsync();
+                .ExecuteUpdateAsync(setters => setters
+                    .SetProperty(s => s.IsDeleted, true));
 
             await _context.CustomerPlatformsConfiguration
                 .Where(c => c.Id == id)
-                .ExecuteDeleteAsync();
+                .ExecuteUpdateAsync(setters => setters
+                    .SetProperty(c => c.IsDeleted, true));
         }
 
         public async Task<CustomerPlatformConfiguration> Update(CustomerPlatformConfiguration configuration)
