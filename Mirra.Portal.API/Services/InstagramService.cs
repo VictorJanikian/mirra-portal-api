@@ -1,4 +1,3 @@
-using System.Security.Cryptography;
 using Microsoft.Extensions.Options;
 using Mirra_Portal_API.Database.Repositories.Interfaces;
 using Mirra_Portal_API.Enums;
@@ -6,7 +5,9 @@ using Mirra_Portal_API.Exceptions;
 using Mirra_Portal_API.Helper;
 using Mirra_Portal_API.Integration.Interfaces;
 using Mirra_Portal_API.Model;
+using Mirra_Portal_API.Model.Responses;
 using Mirra_Portal_API.Services.Interfaces;
+using System.Security.Cryptography;
 
 namespace Mirra_Portal_API.Services
 {
@@ -30,7 +31,7 @@ namespace Mirra_Portal_API.Services
             _applicationSettings = applicationSettings.Value;
         }
 
-        public async Task<string> StartAuthorization()
+        public async Task<StartInstagranIntegrationResponse> StartAuthorization()
         {
             var state = generateState();
 
@@ -45,7 +46,7 @@ namespace Mirra_Portal_API.Services
                 InstagramState = state
             });
 
-            return _instagramIntegration.BuildAuthorizationUrl(state);
+            return new StartInstagranIntegrationResponse { RedirectUrl = _instagramIntegration.BuildAuthorizationUrl(state) };
         }
 
         public async Task<string> HandleCallback(string code, string state, string permissions)

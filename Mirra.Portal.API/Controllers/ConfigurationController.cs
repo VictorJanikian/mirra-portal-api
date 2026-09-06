@@ -37,7 +37,7 @@ namespace Mirra_Portal_API.Controllers
             try
             {
                 var authorizationUrl = await _instagramService.StartAuthorization();
-                return Redirect(authorizationUrl);
+                return Ok(authorizationUrl);
             }
             catch (BadRequestException e)
             {
