@@ -49,7 +49,7 @@ namespace Mirra_Portal_API.Services
             return new StartInstagranIntegrationResponse { RedirectUrl = _instagramIntegration.BuildAuthorizationUrl(state) };
         }
 
-        public async Task<string> HandleCallback(string code, string state, string permissions)
+        public async Task<string> HandleCallback(string code, string state, string? permissions)
         {
             if (string.IsNullOrWhiteSpace(code))
                 throw new BadRequestException("The Instagram authorization code is missing.");
@@ -96,7 +96,7 @@ namespace Mirra_Portal_API.Services
             return fragmentIndex >= 0 ? code.Substring(0, fragmentIndex) : code;
         }
 
-        private static List<string> splitPermissions(string permissions)
+        private static List<string> splitPermissions(string? permissions)
         {
             if (string.IsNullOrWhiteSpace(permissions)) return new List<string>();
 

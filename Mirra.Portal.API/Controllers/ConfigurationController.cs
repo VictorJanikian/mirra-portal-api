@@ -57,7 +57,7 @@ namespace Mirra_Portal_API.Controllers
         [HttpGet("instagram/callback")]
         public async Task<IActionResult> InstagramCallback([FromQuery] string code,
                                                            [FromQuery] string state,
-                                                           [FromQuery] string permissions)
+                                                           [FromQuery] string? permissions = null)
         {
             try
             {
