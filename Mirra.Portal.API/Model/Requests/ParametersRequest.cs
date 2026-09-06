@@ -15,6 +15,7 @@ namespace Mirra_Portal_API.Model.Requests
         public string SEOAdditionalInformation { get; set; }
         public string Description { get; set; }
         public string SearchIntent { get; set; }
+        public string CTA { get; set; }
         public string Language { get; set; }
     }
 }
