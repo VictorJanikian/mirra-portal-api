@@ -8,7 +8,7 @@ namespace Mirra_Portal_API.Services.Interfaces
         Task<StartInstagranIntegrationResponse> StartAuthorization();
 
         /// <summary>Validates the state, turns the code into a 60 days token and returns the URL to redirect the user back to.</summary>
-        Task<string> HandleCallback(string code, string state, string permissions);
+        Task<string> HandleCallback(string code, string state, string? permissions);
 
         string HomeUrl();
     }
