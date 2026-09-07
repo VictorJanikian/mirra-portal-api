@@ -18,6 +18,7 @@ namespace Mirra_Portal_API.Database.DBEntities
         public string? InstagramAccessToken { get; set; }
         public DateTime? InstagramTokenExpiresAt { get; set; }
         public string? InstagramUsername { get; set; }
+        public bool IsConfirmed { get; set; }
         public bool IsDeleted { get; set; }
         public List<SchedulingTableRow> Schedulings { get; set; }
         public List<InstagramPermissionTableRow> InstagramPermissions { get; set; }

@@ -14,6 +14,7 @@
         public string? InstagramAccessToken { get; set; }
         public DateTime? InstagramTokenExpiresAt { get; set; }
         public string? InstagramUsername { get; set; }
+        public bool IsConfirmed { get; set; }
         public List<Scheduling> Schedulings { get; set; }
     }
 }

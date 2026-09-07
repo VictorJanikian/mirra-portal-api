@@ -43,7 +43,8 @@ namespace Mirra_Portal_API.Services
                 Url = string.Empty,
                 Username = string.Empty,
                 Password = string.Empty,
-                InstagramState = state
+                InstagramState = state,
+                IsConfirmed = false
             });
 
             return new StartInstagranIntegrationResponse { RedirectUrl = _instagramIntegration.BuildAuthorizationUrl(state) };
