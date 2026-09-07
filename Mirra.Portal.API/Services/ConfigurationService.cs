@@ -51,6 +51,7 @@ namespace Mirra_Portal_API.Services
 
             configuration.Customer = new Customer { Id = _identityHelper.UserId() };
             configuration.Password = _symmetricEncryptionHelper.Encrypt(configuration.Password);
+            configuration.IsConfirmed = true;
 
             foreach (var schedule in configuration.Schedulings)
             {

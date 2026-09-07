@@ -36,11 +36,14 @@ namespace Mirra_Portal_API.Database.Repositories
                 configuration.Schedulings[index].Id = row.Schedulings[index].Id;
         }
 
+        // Configurações ainda não confirmadas (integrações do Instagram que iniciaram a
+        // autorização mas não voltaram no callback) não são visíveis para o cliente nem
+        // contam nas métricas de conexões.
         public Task<List<CustomerPlatformConfiguration>> GetAllForCustomer(int customerId)
         {
             return _context.CustomerPlatformsConfiguration
                 .AsNoTracking()
-                .Where(configuration => configuration.CustomerId == customerId)
+                .Where(configuration => configuration.CustomerId == customerId && configuration.IsConfirmed)
                 .ProjectTo<CustomerPlatformConfiguration>(_mapper.ConfigurationProvider)
                 .ToListAsync();
 
@@ -51,7 +54,7 @@ namespace Mirra_Portal_API.Database.Repositories
         {
             return await _context.CustomerPlatformsConfiguration
                 .AsNoTracking()
-                .Where(configuration => configuration.Id == id)
+                .Where(configuration => configuration.Id == id && configuration.IsConfirmed)
                 .ProjectTo<CustomerPlatformConfiguration>(_mapper.ConfigurationProvider)
                 .FirstOrDefaultAsync();
         }
@@ -113,7 +116,8 @@ namespace Mirra_Portal_API.Database.Repositories
                     .SetProperty(configuration => configuration.InstagramAccessToken, token.AccessToken)
                     .SetProperty(configuration => configuration.InstagramTokenExpiresAt, token.ExpiresAt())
                     .SetProperty(configuration => configuration.InstagramUserId, profile.UserId)
-                    .SetProperty(configuration => configuration.InstagramUsername, profile.Username));
+                    .SetProperty(configuration => configuration.InstagramUsername, profile.Username)
+                    .SetProperty(configuration => configuration.IsConfirmed, true));
 
             await ReplaceInstagramPermissions(configurationId, permissions);
         }
