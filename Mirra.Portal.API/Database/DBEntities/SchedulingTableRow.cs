@@ -15,6 +15,7 @@ namespace Mirra_Portal_API.Database.DBEntities
         public int RunsPerWeek { get; set; }
         public int? SchedulingStatusId { get; set; }
         public SchedulingStatusTableRow SchedulingStatus { get; set; }
+        public bool IsDeleted { get; set; }
         public DateTime? CreatedAt { get; set; }
     }
 }

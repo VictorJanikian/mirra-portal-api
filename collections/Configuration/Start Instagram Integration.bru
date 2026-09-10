@@ -1,0 +1,21 @@
+meta {
+  name: Start Instagram Integration
+  type: http
+  seq: 12
+}
+
+get {
+  url: {{baseUrl_Mirra}}/api/configuration/instagram/start
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token_Mirra}}
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+  forwardAuthorizationHeader: false
+}

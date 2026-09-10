@@ -25,6 +25,20 @@ namespace Mirra_Portal_API.Database
 #endif
         }
 
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            // Soft delete: configurações marcadas como excluídas (e seus agendamentos)
+            // ficam invisíveis para todas as consultas da aplicação.
+            modelBuilder.Entity<CustomerPlatformConfigurationTableRow>()
+                .HasQueryFilter(configuration => !configuration.IsDeleted);
+
+            modelBuilder.Entity<SchedulingTableRow>()
+                .HasQueryFilter(scheduling => !scheduling.IsDeleted
+                    && !scheduling.CustomerPlatformConfiguration.IsDeleted);
+        }
+
         public DbSet<CustomerTableRow> Customers => Set<CustomerTableRow>();
         public DbSet<PlatformTableRow> Platforms => Set<PlatformTableRow>();
         public DbSet<ParametersTableRow> Parameters => Set<ParametersTableRow>();
