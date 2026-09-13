@@ -46,6 +46,7 @@ namespace Mirra_Portal_API.Database
         public DbSet<SchedulingTableRow> Schedulings => Set<SchedulingTableRow>();
         public DbSet<InstagramPermissionTableRow> InstagramPermissions => Set<InstagramPermissionTableRow>();
         public DbSet<ContentTypeTableRow> ContentTypes => Set<ContentTypeTableRow>();
+        public DbSet<CaptionSizeTableRow> CaptionSizes => Set<CaptionSizeTableRow>();
         public DbSet<SubscriptionPlanTableRow> SubscriptionPlans => Set<SubscriptionPlanTableRow>();
         public DbSet<SchedulingStatusTableRow> SchedulingStatus => Set<SchedulingStatusTableRow>();
         public DbSet<SubscriptionStatusTableRow> SubscriptionStatus => Set<SubscriptionStatusTableRow>();
