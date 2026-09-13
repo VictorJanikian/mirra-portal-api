@@ -20,6 +20,16 @@ namespace Mirra_Portal_API.Database.DBEntities
         public bool? IsDraft { get; set; }
         public string Language { get; set; }
         public string? CTA { get; set; }
+        public string? VisualHookInstructions { get; set; }
+        public string? ColorPalette { get; set; }
+        public string? VisualLayout { get; set; }
+        public string? TextOnImage { get; set; }
+        public int? CaptionSizeId { get; set; }
+        public CaptionSizeTableRow? CaptionSize { get; set; }
+        public string? HashtagsStrategy { get; set; }
+        public string? AvoidTopics { get; set; }
+        public string? ContentTone { get; set; }
+        public string? CaptionInstructions { get; set; }
         public DateTime? CreatedAt { get; set; }
     }
 }
