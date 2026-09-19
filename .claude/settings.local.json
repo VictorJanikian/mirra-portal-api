@@ -4,7 +4,8 @@
       "Bash(xargs -0 grep -l [çãõéáóêîüâ])",
       "Bash(grep -r [çãõéáóêîüâ] 'C:\\\\Users\\\\vcjan\\\\Desktop\\\\projects\\\\Mirra Portal API\\\\Mirra.Portal.API' --include=*.cs --include=*.html --include=*.xml --include=*.pubxml)",
       "Bash(grep -r ^[[:space:]]*[A-Z][^]*[çãõéáóêî] 'C:\\\\Users\\\\vcjan\\\\Desktop\\\\projects\\\\Mirra Portal API\\\\Mirra.Portal.API' --include=*.cs)",
-      "Bash(grep -rE \"\\(Nao|Nenhum|Algum|Qualquer|Desde|Durante|Apos|Antes|Seguinte|Junto|Atraves|Mediante|Conforme|Segunda|Primeira|Ultimo|Proximo|Novembro|Outubro|Setembro|Agosto|Julho|Junho|Maio|Abril|Marco|Fevereiro|Janeiro\\)\" 'C:\\\\Users\\\\vcjan\\\\Desktop\\\\projects\\\\Mirra Portal API\\\\Mirra.Portal.API' --include=*.cs)"
+      "Bash(grep -rE \"\\(Nao|Nenhum|Algum|Qualquer|Desde|Durante|Apos|Antes|Seguinte|Junto|Atraves|Mediante|Conforme|Segunda|Primeira|Ultimo|Proximo|Novembro|Outubro|Setembro|Agosto|Julho|Junho|Maio|Abril|Marco|Fevereiro|Janeiro\\)\" 'C:\\\\Users\\\\vcjan\\\\Desktop\\\\projects\\\\Mirra Portal API\\\\Mirra.Portal.API' --include=*.cs)",
+      "Bash(dotnet build *)"
     ]
   }
 }
