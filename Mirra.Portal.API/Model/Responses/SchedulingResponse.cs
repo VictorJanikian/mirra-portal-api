@@ -8,6 +8,8 @@
         public string Timezone { get; set; }
         public int ContentTypeId { get; set; }
         public int? Status { get; set; }
+        public bool? InstagramAIGeneratedLabel { get; set; }
+        public bool? InstagramPartnershipLabel { get; set; }
         public ParametersResponse Parameters { get; set; }
     }
 }
