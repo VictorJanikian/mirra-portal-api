@@ -13,7 +13,6 @@ namespace Mirra_Portal_API.Model.Requests
         [MinValue(1)]
         public int? ContentTypeId { get; set; }
         public bool? InstagramAIGeneratedLabel { get; set; }
-        public bool? InstagramPartnershipLabel { get; set; }
         [Required]
         public ParametersRequest Parameters { get; set; }
     }

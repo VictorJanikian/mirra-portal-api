@@ -11,7 +11,6 @@
         public int ContentTypeId { get; set; }
         public int RunsPerWeek { get; set; }
         public bool? InstagramAIGeneratedLabel { get; set; }
-        public bool? InstagramPartnershipLabel { get; set; }
         public SchedulingStatus SchedulingStatus { get; set; }
     }
 }
