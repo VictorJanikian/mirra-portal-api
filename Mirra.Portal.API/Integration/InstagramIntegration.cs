@@ -77,7 +77,8 @@ namespace Mirra_Portal_API.Integration
                 + "&access_token=" + Uri.EscapeDataString(shortLivedToken);
 
             using var response = await _restClient.get(url);
-            var root = await ReadJson(response, "Could not exchange the Instagram token for a long lived one.");
+            var root = await ReadJson(response, "Could not exchange the Instagram token for a long lived one."
+                + " Request: " + Mask(url) + ".");
 
             return new InstagramAccessToken
             {
@@ -108,6 +109,27 @@ namespace Mirra_Portal_API.Integration
         private string RedirectUri()
         {
             return _applicationSettings.ApiBaseUrl.TrimEnd('/') + CallbackRoute;
+        }
+
+        /// <summary>Keeps the URL readable in the logs while hiding the secret and the token themselves.</summary>
+        private static string Mask(string url)
+        {
+            return MaskParameter(MaskParameter(url, "client_secret"), "access_token");
+        }
+
+        private static string MaskParameter(string url, string parameter)
+        {
+            var start = url.IndexOf(parameter + "=", StringComparison.Ordinal);
+            if (start < 0) return url;
+
+            var valueStart = start + parameter.Length + 1;
+            var valueEnd = url.IndexOf('&', valueStart);
+            if (valueEnd < 0) valueEnd = url.Length;
+
+            var value = url.Substring(valueStart, valueEnd - valueStart);
+            var hint = value.Length <= 8 ? "(" + value.Length + " chars)" : value.Substring(0, 8) + "...(" + value.Length + " chars)";
+
+            return url.Substring(0, valueStart) + hint + url.Substring(valueEnd);
         }
 
         private static async Task<JsonElement> ReadJson(HttpResponseMessage response, string errorMessage)
