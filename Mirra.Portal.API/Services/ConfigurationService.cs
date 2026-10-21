@@ -143,6 +143,7 @@ namespace Mirra_Portal_API.Services
         public async Task<CustomerPlatformConfiguration> UpdateConfiguration(int configurationId, CustomerPlatformConfiguration configuration)
         {
             await checkIfConfigurationBelongsToCustomer(configurationId);
+            await addApiLinkIfWordpress(configurationId, configuration);
 
             configuration.Id = configurationId;
             configuration.Password = _symmetricEncryptionHelper.Encrypt(configuration.Password);
@@ -196,5 +197,12 @@ namespace Mirra_Portal_API.Services
                 throw new NotFoundException("Configuration not found.");
         }
 
+        private async Task addApiLinkIfWordpress(int configurationId, CustomerPlatformConfiguration configuration)
+        {
+            var databaseConfiguration = await _configurationRepository.GetById(configurationId);
+            if (databaseConfiguration.Platform.Id == (int)EPlatform.WORDPRESS)
+                configuration.Url = configuration.Url.TrimEnd('/') + "/wp-json";
+            
+        }
     }
 }
