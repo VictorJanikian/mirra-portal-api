@@ -143,6 +143,7 @@ namespace Mirra_Portal_API.Services
         public async Task<CustomerPlatformConfiguration> UpdateConfiguration(int configurationId, CustomerPlatformConfiguration configuration)
         {
             await checkIfConfigurationBelongsToCustomer(configurationId);
+            await CheckIfIsValidWordPressSite(configuration.Url);
             await addApiLinkIfWordpress(configurationId, configuration);
 
             configuration.Id = configurationId;
